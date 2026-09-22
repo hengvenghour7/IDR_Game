@@ -30,11 +30,11 @@ class Game {
     }
 }
 
-const player: Character = new Character("/images/character.png");
 const canvas = document.getElementById("game_canvas") as HTMLCanvasElement;
 canvas.width = canvas.clientWidth;
 canvas.height = 800;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+ctx.imageSmoothingEnabled = false;
 
 const game = new Game();
 const animate = (currentTime: number = 0) => {

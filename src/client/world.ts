@@ -8,7 +8,7 @@ class World {
         this.worldTexture.src = imgSrc;
     }
     draw = (ctx: CanvasRenderingContext2D) => {
-        ctx.drawImage(this.worldTexture, 0, 0, 480, 320)
+        ctx.drawImage(this.worldTexture, 0, 0, 480 * 2, 320 * 2)
     }
 }
 

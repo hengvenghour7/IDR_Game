@@ -22,6 +22,12 @@ class Character {
         if (inputKeys.has("a")) {
             this.x--;
         }
+        if (inputKeys.has("s")) {
+            this.y++;
+        }
+        if (inputKeys.has("w")) {
+            this.y--;
+        }
     }
     draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
         ctx.drawImage(this.characterImage, this.currentFrame * 32, 32, 32, 32 , this.x, this.y, 32, 32);
