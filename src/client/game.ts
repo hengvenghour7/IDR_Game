@@ -12,6 +12,12 @@ class Game {
     world: World;
     
     constructor() {
+        window.addEventListener("keypress", (e) => {
+        inputKeys.add(e.key);
+        })
+        window.addEventListener("keyup", (e) => {
+            inputKeys.delete(e.key);
+        })
         this.player = new Character("/images/character.png");
         this.world = new World("/images/world.png");
     }
@@ -29,16 +35,7 @@ const canvas = document.getElementById("game_canvas") as HTMLCanvasElement;
 canvas.width = canvas.clientWidth;
 canvas.height = 800;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-window.addEventListener("keypress", (e) => {
-    if (e.key == "d") {
-        inputKeys.add("d")
-    }
-})
-window.addEventListener("keyup", (e) => {
-    if (e.key == "d") {
-        inputKeys.delete("d");
-    }
-})
+
 const game = new Game();
 const animate = (currentTime: number = 0) => {
     deltaTime = (currentTime - previousTime) / 1000;

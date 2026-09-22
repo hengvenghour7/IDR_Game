@@ -19,6 +19,9 @@ class Character {
         if (inputKeys.has("d")) {
             this.x++;
         }
+        if (inputKeys.has("a")) {
+            this.x--;
+        }
     }
     draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
         ctx.drawImage(this.characterImage, this.currentFrame * 32, 32, 32, 32 , this.x, this.y, 32, 32);
