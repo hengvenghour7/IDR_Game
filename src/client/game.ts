@@ -1,4 +1,4 @@
-import { Character, Player } from "./character"
+import { Character, Player, Animal } from "./character"
 import { inputKeys } from "./utilities";
 import { World } from "./world";
 import { canvas } from "./globalVar";
@@ -9,6 +9,7 @@ let deltaTime = 0;
 class Game {
     player: Player;
     world: World;
+    dog: Animal;
     
     constructor() {
         window.addEventListener("keypress", (e) => {
@@ -19,12 +20,15 @@ class Game {
         })
         this.world = new World("/images/world.png");
         this.player = new Player("/images/character.png");
+        this.dog = new Animal("/images/animal.png")
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
         this.player.tick(deltaTime, this.world.collisionData);
         this.world.draw(ctx, this.player.getWorldPos());
         this.player.draw(ctx, deltaTime);
+        this.dog.draw(ctx, deltaTime);
+        this.dog.approachTarget(this.player);
     }
 }
 

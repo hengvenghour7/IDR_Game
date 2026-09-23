@@ -1,5 +1,5 @@
 import { inputKeys, Rectangle, Vector2 } from "./utilities";
-import { checkIsCollisionTile, getFutureCollisionBox, vector2Scale } from "./helpers";
+import { checkIsCollisionTile, getFutureCollisionBox, vector2Add, vector2Normalize, vector2Scale, vector2Substract } from "./helpers";
 import { TILE_SIZE, canvas } from "./globalVar";
 
 class Character {
@@ -112,12 +112,45 @@ class Player extends Character {
     }
 }
 class Animal {
-    constructor() {
+    characterImage: HTMLImageElement;
+    x: number;
+    y: number;
+    currentFrame: number;
+    updateAnimationTime: number;
+    collisionBox: Rectangle;
 
+    constructor(textureSrc: string) {
+        this.characterImage = new Image();
+        this.characterImage.src = textureSrc
+        this.x = 0;
+        this.y = 0;
+        this.currentFrame = 0;
+        this.updateAnimationTime = 0;
+        this.collisionBox = {x: this.x, y: this.y, width: TILE_SIZE, height: TILE_SIZE};
+    }
+    draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
+        ctx.drawImage(this.characterImage, this.currentFrame * 32, 0, 32, 32 , this.x, this.y, 32, 32);
+        this.updateAnimationTime += deltaTime;
+        if (this.updateAnimationTime > 0.1)
+        {
+            this.currentFrame++;
+            if (this.currentFrame > 5)
+            {
+                this.currentFrame = 0;
+            }
+            this.updateAnimationTime = 0;
+        }
+    }
+    approachTarget = (target: Player) => {
+        let targetPos = vector2Add(target.worldPos, {x:canvas.clientWidth, y: canvas.clientHeight});
+        let direction = vector2Normalize(vector2Substract(targetPos, {x:this.x, y:this.y}));
+        this.x+= direction.x;
+        this.y+= direction.y;
     }
 }
 
 export {
     Character,
-    Player
+    Player,
+    Animal
 }
