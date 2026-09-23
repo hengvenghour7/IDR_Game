@@ -1,12 +1,13 @@
-import { Character } from "./character"
+import { Character, Player } from "./character"
 import { inputKeys } from "./utilities";
 import { World } from "./world";
+import { canvas } from "./globalVar";
 
 let previousTime = 0;
 let deltaTime = 0;
 
 class Game {
-    player: Character;
+    player: Player;
     world: World;
     
     constructor() {
@@ -17,19 +18,16 @@ class Game {
             inputKeys.delete(e.key);
         })
         this.world = new World("/images/world.png");
-        this.player = new Character("/images/character.png");
+        this.player = new Player("/images/character.png");
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
         this.player.tick(deltaTime, this.world.collisionData);
-        this.world.draw(ctx);
+        this.world.draw(ctx, this.player.getWorldPos());
         this.player.draw(ctx, deltaTime);
     }
 }
 
-const canvas = document.getElementById("game_canvas") as HTMLCanvasElement;
-canvas.width = canvas.clientWidth;
-canvas.height = 800;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 ctx.imageSmoothingEnabled = false;
 
