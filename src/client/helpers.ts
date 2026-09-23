@@ -50,6 +50,14 @@ const readJsonFile = async (filePath: string) => {
 const getElementFromJsonByNameField = (j: any, name: string) => {
     return j["layers"].find((layer: Layer) => layer.name == name)
 }
+const getFutureCollisionBox = (collisionBox: Rectangle, direction: Vector2): Rectangle => {
+    return {
+        x: collisionBox.x + direction.x,
+        y: collisionBox.y + direction.y,
+        width: collisionBox.width,
+        height: collisionBox.height
+    };
+}
 const checkIsCollisionTile = (array2D: Array<Array<number>>, collisionBox: Rectangle): boolean => {
     const startX = Math.floor(collisionBox.x / TILE_SIZE);
     const startY = Math.floor(collisionBox.y / TILE_SIZE);
@@ -94,5 +102,6 @@ export {
     arrayToArray2D,
     readJsonFile,
     getElementFromJsonByNameField,
+    getFutureCollisionBox,
     checkIsCollisionTile
 }

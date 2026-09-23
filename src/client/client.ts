@@ -1,4 +1,3 @@
-import { apple, animate } from "./game";
+import { animate } from "./game";
 
-console.log("client is working " + apple);
 animate();
