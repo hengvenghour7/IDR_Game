@@ -144,8 +144,10 @@ class Animal {
     approachTarget = (target: Player) => {
         let targetPos = vector2Add(target.worldPos, {x:canvas.clientWidth, y: canvas.clientHeight});
         let direction = vector2Normalize(vector2Substract(targetPos, {x:this.x, y:this.y}));
-        this.x+= direction.x;
-        this.y+= direction.y;
+        if (this.x < target.x && this.y < target.y) {
+            this.y+= direction.y;
+            this.x+= direction.x;
+        }
     }
 }
 
