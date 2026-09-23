@@ -3,6 +3,12 @@ interface Vector2 {
     x: number;
     y: number;
 }
+interface Rectangle {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 interface Layer {
     name: string;
     id: number;
@@ -19,5 +25,6 @@ interface Layer {
 export {
     inputKeys,
     Vector2,
+    Rectangle,
     Layer
 }

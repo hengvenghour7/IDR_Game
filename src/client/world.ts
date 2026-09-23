@@ -22,6 +22,13 @@ class World {
     }
     draw = (ctx: CanvasRenderingContext2D) => {
         ctx.drawImage(this.worldTexture, 0, 0, 1600 * 2, 1280 * 2)
+        this.collisionData.forEach((d, j) => {
+            d.forEach((item, i) => {
+                if (item !== 0) {
+                    ctx.fillRect(i * 32, j * 32, 32, 32);
+                }
+            })
+        })
     }
 }
 

@@ -1,4 +1,5 @@
-import { inputKeys } from "./utilities";
+import { inputKeys, Rectangle } from "./utilities";
+import { checkIsCollisionTile } from "./helpers";
 
 class Character {
     characterImage: HTMLImageElement;
@@ -15,8 +16,10 @@ class Character {
         this.currentFrame = 0;
         this.updateAnimationTime = 0;
     }
-    tick = () => {
+    tick = (deltaTime: number, worldCollisionData: Array<Array<number>>) => {
         if (inputKeys.has("d")) {
+            const collisionBox: Rectangle = {x: this.x+1, y:this.y, width: 32, height:32};
+            if (checkIsCollisionTile(worldCollisionData, collisionBox)) return;
             this.x++;
         }
         if (inputKeys.has("a")) {

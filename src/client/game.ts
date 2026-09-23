@@ -18,13 +18,13 @@ class Game {
         window.addEventListener("keyup", (e) => {
             inputKeys.delete(e.key);
         })
-        this.player = new Character("/images/character.png");
         this.world = new World("/images/world.png");
+        this.player = new Character("/images/character.png");
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
         ctx?.fillRect(x, 100, 20, 20);
-        this.player.tick();
+        this.player.tick(deltaTime, this.world.collisionData);
         this.world.draw(ctx);
         this.player.draw(ctx, deltaTime);
     }
