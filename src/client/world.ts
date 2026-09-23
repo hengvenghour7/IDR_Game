@@ -23,7 +23,6 @@ class World {
     draw = (ctx: CanvasRenderingContext2D) => {
         ctx.drawImage(this.worldTexture, 0, 0, 1600 * 2, 1280 * 2)
     }
-    
 }
 
 export {
