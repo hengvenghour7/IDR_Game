@@ -1,8 +1,9 @@
 import { Layer } from "./utilities";
+import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
 
 class World {
     worldTexture: HTMLImageElement;
-    collisionData: string[] = [];
+    collisionData: Array<Array<number>> = [];
     width: number;
     height: number;
 
@@ -15,38 +16,14 @@ class World {
         this.height = 80;
     }
     loadMapData = async () => {
-        const data = await fetch("/map_properties/world.tmj");
-        data.json().then(
-            (data) => {
-                console.log(data);
-                return data["layers"].find(
-                    (layer: Layer) => layer.name == "collision"
-                )
-            }
-        ).then(
-            (res) => {
-                console.log(res.data);
-                console.log("new array ", this.arrayToArray2D(res.data));
-                
-            }
-        )
+        const j = await readJsonFile("/map_properties/world.tmj");
+        const data = getElementFromJsonByNameField(j, "collision");    
+        this.collisionData = arrayToArray2D(data["data"], this.width);
     }
     draw = (ctx: CanvasRenderingContext2D) => {
         ctx.drawImage(this.worldTexture, 0, 0, 1600 * 2, 1280 * 2)
     }
-    arrayToArray2D = (arrayData: number[]) => {
-        const array2D: Array<Array<number>> = [];
-        let index: number = 0;
-        for (let j: number = 0; j < arrayData.length ; j+=this.width) {
-            const chunk: number[] = []
-            for (let i = 0; i < this.width; i ++) {
-                chunk.push(arrayData[index])
-                index ++;
-            }
-            array2D.push(chunk);
-        }
-        return array2D;
-    }
+    
 }
 
 export {
