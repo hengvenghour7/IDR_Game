@@ -25,8 +25,21 @@ class Vector2 {
         return new Vector2(this.x / len, this.y / len);
     } 
 }
+interface Layer {
+    name: string;
+    id: number;
+    opacity: number;
+    visible: boolean;
+    type: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    data: number[];
+}
 
 export {
     inputKeys,
-    Vector2
+    Vector2,
+    Layer
 }
