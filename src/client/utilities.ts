@@ -21,10 +21,22 @@ interface Layer {
     height: number;
     data: number[];
 }
+interface ViewPointType {
+    height: number
+    id: number
+    name: string
+    rotation: number
+    type: string
+    visible: boolean
+    width: number
+    x: number
+    y: number
+}
 
 export {
     inputKeys,
     Vector2,
     Rectangle,
-    Layer
+    Layer,
+    ViewPointType
 }

@@ -1,4 +1,4 @@
-import { Layer, Vector2 } from "./utilities";
+import { Layer, Vector2, ViewPointType } from "./utilities";
 import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
 
 class World {
@@ -6,6 +6,7 @@ class World {
     collisionData: Array<Array<number>> = [];
     width: number;
     height: number;
+    viewPoints: ViewPointType[];
 
     constructor(imgSrc: string, )
     {
@@ -14,10 +15,15 @@ class World {
         this.loadMapData();
         this.width = 100;
         this.height = 80;
+        this.viewPoints = [];
     }
     loadMapData = async () => {
         const j = await readJsonFile("/map_properties/world.tmj");
-        const data = getElementFromJsonByNameField(j, "collision");    
+        const data = getElementFromJsonByNameField(j, "collision");
+        const viewPointsData = getElementFromJsonByNameField(j, "view_point");
+        this.viewPoints = viewPointsData["objects"]
+        console.log(this.viewPoints);
+           
         this.collisionData = arrayToArray2D(data["data"], this.width);
     }
     draw = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
