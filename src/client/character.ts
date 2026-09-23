@@ -9,6 +9,7 @@ class Character {
     currentFrame: number;
     updateAnimationTime: number;
     collisionBox: Rectangle;
+    speed: number;
 
     constructor(textureSrc: string) {
         this.characterImage = new Image();
@@ -17,6 +18,7 @@ class Character {
         this.y = 0;
         this.currentFrame = 0;
         this.updateAnimationTime = 0;
+        this.speed = 70;
         this.collisionBox = {x: this.x, y: this.y, width: TILE_SIZE, height: TILE_SIZE};
     }
     tick = (deltaTime: number, worldCollisionData: Array<Array<number>>) => {
@@ -90,6 +92,7 @@ class Player extends Character {
                 )
             )
         {
+            direction = vector2Scale(vector2Normalize(direction), deltaTime * this.speed) 
             this.worldPos.x += direction.x;
             this.worldPos.y += direction.y;
         };
@@ -118,18 +121,23 @@ class Animal {
     currentFrame: number;
     updateAnimationTime: number;
     collisionBox: Rectangle;
+    worldPos: Vector2;
+    speed: number;
 
     constructor(textureSrc: string) {
         this.characterImage = new Image();
         this.characterImage.src = textureSrc
         this.x = 0;
         this.y = 0;
+        this.worldPos = {x:0, y:0};
         this.currentFrame = 0;
         this.updateAnimationTime = 0;
+        this.speed = 60;
         this.collisionBox = {x: this.x, y: this.y, width: TILE_SIZE, height: TILE_SIZE};
     }
-    draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
-        ctx.drawImage(this.characterImage, this.currentFrame * 32, 0, 32, 32 , this.x, this.y, 32, 32);
+    draw = (ctx: CanvasRenderingContext2D, deltaTime: number, worldPos: Vector2, playerWorldPos: Vector2) => {
+        let screenPos: Vector2 = vector2Add(this.worldPos, worldPos);
+        ctx.drawImage(this.characterImage, this.currentFrame * 32, 0, 32, 32 , screenPos.x, screenPos.y, 32, 32);
         this.updateAnimationTime += deltaTime;
         if (this.updateAnimationTime > 0.1)
         {
@@ -141,13 +149,15 @@ class Animal {
             this.updateAnimationTime = 0;
         }
     }
-    approachTarget = (target: Player) => {
+    approachTarget = (target: Player, deltaTime: number) => {
         let targetPos = vector2Add(target.worldPos, {x:canvas.clientWidth/2, y: canvas.clientHeight/2});
-        let direction = vector2Normalize(vector2Substract(targetPos, {x:this.x, y:this.y}));
-        if (this.x < targetPos.x && this.y < targetPos.y) {
-            this.y+= direction.y;
-            this.x+= direction.x;
-        }
+        let directionNormalize = vector2Normalize(vector2Substract(targetPos, this.worldPos));
+        
+        let direction = vector2Scale(directionNormalize, this.speed * deltaTime)
+        // if (this.worldPos.x < targetPos.x - 32 && this.worldPos.y < targetPos.y - 32) {
+        // }
+        this.worldPos.x+= direction.x;
+        this.worldPos.y+= direction.y;
     }
 }
 

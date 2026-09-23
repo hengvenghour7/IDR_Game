@@ -24,11 +24,12 @@ class Game {
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         this.player.tick(deltaTime, this.world.collisionData);
         this.world.draw(ctx, this.player.getWorldPos());
         this.player.draw(ctx, deltaTime);
-        this.dog.draw(ctx, deltaTime);
-        this.dog.approachTarget(this.player);
+        this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
+        this.dog.approachTarget(this.player, deltaTime);
     }
 }
 
