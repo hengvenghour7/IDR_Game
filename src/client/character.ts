@@ -68,11 +68,11 @@ class Player extends Character {
         this.worldPos = {x:this.x, y:this.y};
     }
     override tick = (deltaTime: number, worldCollisionData: Array<Array<number>>) => {
-        this.collisionBox.x = this.x;
-        this.collisionBox.y = this.y;
+        this.collisionBox.x = this.worldPos.x + canvas.clientWidth/2;
+        this.collisionBox.y = this.worldPos.y +  canvas.clientHeight/2;
+        // console.log("world pos ", this.collisionBox)
         let direction: Vector2 = {x:0, y:0};
         if (inputKeys.has("d")) {
-            const collisionBox: Rectangle = {x: this.x+1, y:this.y, width: 32, height:32};
             direction.x = 1;
         }
         if (inputKeys.has("a")) {
@@ -95,7 +95,7 @@ class Player extends Character {
         };
     };
     override draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
-        ctx.drawImage(this.characterImage, this.currentFrame * 32, 32, 32, 32 , canvas.width*0.5, canvas.height*0.5, 32, 32);
+        ctx.drawImage(this.characterImage, this.currentFrame * 32, 32, 32, 32 , canvas.clientWidth/2, canvas.clientHeight/2, 32, 32);
         this.updateAnimationTime += deltaTime;
         if (this.updateAnimationTime > 0.1)
         {
