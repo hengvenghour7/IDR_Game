@@ -113,6 +113,14 @@ class Player extends Character {
     getWorldPos = () => {
         return vector2Scale(this.worldPos, -1);
     }
+    getCollisionBox = (): Rectangle => {
+        return {
+            x: canvas.width/2,
+            y: canvas.height/2 - 42,
+            width: this.collisionBox.width,
+            height: this.collisionBox.height
+        }
+    }
 }
 class Animal {
     characterImage: HTMLImageElement;
