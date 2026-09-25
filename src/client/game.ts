@@ -1,5 +1,5 @@
 import { Character, Player, Animal } from "./character"
-import { inputKeys } from "./utilities";
+import { inputKeys, Vector2 } from "./utilities";
 import { World } from "./world";
 import { canvas } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
@@ -42,6 +42,12 @@ class Game {
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.interactionHandler.tick(ctx, this.player.getWorldPos());
+    }
+    changeworld = ( destination: Vector2) => {
+
+    }
+    prepareWorld = () => {
+
     }
 }
 

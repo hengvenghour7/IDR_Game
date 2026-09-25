@@ -3,18 +3,22 @@ import { Character, Player } from "./character";
 import { checkRectangleCollision } from "./helpers";
 import { Rectangle, Vector2 } from "./utilities";
 import { inputKeys } from "./utilities";
+import { canvas } from "./globalVar";
 
 class InteractionHandler {
     world: World;
     character: Player;
     isViewOpen: boolean;
     isViewAvailable: boolean;
+    viewImage: HTMLImageElement;
 
     constructor (world: World, character: Player) {
         this.world = world;
         this.character = character;
         this.isViewOpen = false;
         this.isViewAvailable = false;
+        this.viewImage = new Image();
+        this.viewImage.src = "images/scenery/view_1.png"
     }
     tick = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
         // console.log(" fds", this.world.viewPoints);
@@ -35,12 +39,11 @@ class InteractionHandler {
                 }
                 if (inputKeys.has("i") && this.isViewOpen == false) {
                     this.isViewOpen = true;
-                    console.log("ii detect");
+                    const imgSrc = p.properties.find((item) => item.name === "imgSrc")?.value;
+                    if (typeof imgSrc === "string") {
+                        this.viewImage.src = imgSrc;
+                    }
                 }
-            }
-            if (inputKeys.has("iu") && this.isViewOpen == true) {
-                console.log("view close");
-                this.isViewOpen = false;
             }
             if (this.isViewAvailable) {
                 ctx.fillStyle = "white";
@@ -50,9 +53,14 @@ class InteractionHandler {
             }
             this.isViewAvailable = false;
         })
-        // if (this.isViewOpen && inputKeys.has("i")) {
-        //     this.isViewOpen = false;
-        // }
+        if (this.isViewOpen) {
+            ctx.drawImage(this.viewImage, 0, 0, canvas.width, canvas.height);
+
+        }
+        if (inputKeys.has("iu") && this.isViewOpen == true) {
+            console.log("view close");
+            this.isViewOpen = false;
+        }
     }
 }
 

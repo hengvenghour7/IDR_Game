@@ -21,16 +21,22 @@ interface Layer {
     height: number;
     data: number[];
 }
+interface PropertyType {
+    name: string;
+    type: string;
+    value: string | number;
+}
 interface ViewPointType {
-    height: number
-    id: number
-    name: string
-    rotation: number
-    type: string
-    visible: boolean
-    width: number
-    x: number
-    y: number
+    height: number;
+    id: number;
+    name: string;
+    rotation: number;
+    type: string;
+    visible: boolean;
+    width: number;
+    x: number;
+    y: number;
+    properties: PropertyType[]
 }
 
 export {
