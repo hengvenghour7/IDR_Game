@@ -123,7 +123,7 @@ class Game {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }
-        void this.changeworld(destinationMap);
+        this.changeworld(destinationMap);
     }
     private drawMapSwitchers = () => {
         ctx.save();
@@ -154,9 +154,6 @@ const animate = (currentTime: number = 0) => {
     game.tick(deltaTime);
     requestAnimationFrame(animate);
 }
-void prepared.then(() => requestAnimationFrame(animate)).catch((error) => {
-    console.error("Unable to prepare the game world:", error);
-});
 export {
     animate
 }
