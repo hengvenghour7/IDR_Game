@@ -1,5 +1,5 @@
 import { inputKeys, Rectangle, Vector2 } from "./utilities";
-import { checkIsCollisionTile, getFutureCollisionBox, vector2Add, vector2Normalize, vector2Scale, vector2Substract } from "./helpers";
+import { checkIsCollisionTile, getFutureCollisionBox, vector2Add, vector2Normalize, vector2Scale, vector2Substract, vector2Length } from "./helpers";
 import { TILE_SIZE, canvas } from "./globalVar";
 
 class Character {
@@ -159,7 +159,10 @@ class Animal {
     }
     approachTarget = (target: Player, deltaTime: number) => {
         let targetPos = vector2Add(target.worldPos, {x:canvas.clientWidth/2, y: canvas.clientHeight/2});
-        let directionNormalize = vector2Normalize(vector2Substract(targetPos, this.worldPos));
+        let betweenDistance: Vector2 = vector2Substract(targetPos, this.worldPos)
+        if (vector2Length(betweenDistance) < 30) return;
+
+        let directionNormalize = vector2Normalize(betweenDistance);
         
         let direction = vector2Scale(directionNormalize, this.speed * deltaTime)
         // if (this.worldPos.x < targetPos.x - 32 && this.worldPos.y < targetPos.y - 32) {
