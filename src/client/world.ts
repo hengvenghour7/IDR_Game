@@ -1,5 +1,6 @@
-import { Layer, Vector2, ViewPointType } from "./utilities";
+import { Layer, MapSwitcherType, Vector2, ViewPointType } from "./utilities";
 import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
+import { assetUrl, GLOBAL_SCALE } from "./globalVar";
 
 class World {
     worldTexture: HTMLImageElement;
@@ -7,27 +8,35 @@ class World {
     width: number;
     height: number;
     viewPoints: ViewPointType[];
+    mapSwitchers: MapSwitcherType[] = [];
+    private mapDataPromise: Promise<void>;
 
-    constructor(imgSrc: string, )
+    constructor(imgSrc: string, mapDataSrc = assetUrl("map_properties/world.tmj"))
     {
         this.worldTexture = new Image();
         this.worldTexture.src = imgSrc;
-        this.loadMapData();
         this.width = 100;
         this.height = 80;
         this.viewPoints = [];
+        this.mapDataPromise = this.loadMapData(mapDataSrc);
     }
-    loadMapData = async () => {
-        const j = await readJsonFile("/map_properties/world.tmj");
+    loadMapData = async (mapDataSrc = assetUrl("map_properties/world.tmj")) => {
+        const j = await readJsonFile(mapDataSrc);
         const data = getElementFromJsonByNameField(j, "collision");
         const viewPointsData = getElementFromJsonByNameField(j, "view_point");
-        this.viewPoints = viewPointsData["objects"]
-        console.log(this.viewPoints);
-           
-        this.collisionData = arrayToArray2D(data["data"], this.width);
+        const mapSwitchersData = getElementFromJsonByNameField(j, "map_switcher");
+        if (!data || !Array.isArray(data.data) || typeof data.width !== "number") {
+            throw new Error(`Map ${mapDataSrc} has no valid collision layer data`);
+        }
+        this.width = data.width;
+        this.height = data.height;
+        this.viewPoints = viewPointsData?.objects ?? [];
+        this.mapSwitchers = mapSwitchersData?.objects ?? [];
+        this.collisionData = arrayToArray2D(data.data, this.width);
     }
+    prepare = () => this.mapDataPromise;
     draw = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
-        ctx.drawImage(this.worldTexture, worldPos.x, worldPos.y, 1600 * 2, 1280 * 2)
+        ctx.drawImage(this.worldTexture, worldPos.x * GLOBAL_SCALE, worldPos.y * GLOBAL_SCALE, 1600 * 2 * GLOBAL_SCALE, 1280 * 2 * GLOBAL_SCALE)
         // this.collisionData.forEach((d, j) => {
         //     d.forEach((item, i) => {
         //         if (item !== 0) {

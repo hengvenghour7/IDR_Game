@@ -80,7 +80,7 @@ const checkIsCollisionTile = (array2D: Array<Array<number>>, collisionBox: Recta
                 x < 0 ||
                 x >= array2D[y].length
             ) {
-                continue;
+                return true;
             }
 
             // 1 = collision tile

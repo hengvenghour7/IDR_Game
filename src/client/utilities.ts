@@ -38,11 +38,13 @@ interface ViewPointType {
     y: number;
     properties: PropertyType[]
 }
+interface MapSwitcherType extends ViewPointType {}
 
 export {
     inputKeys,
     Vector2,
     Rectangle,
     Layer,
-    ViewPointType
+    ViewPointType,
+    MapSwitcherType
 }

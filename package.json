@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "client": "vite",
+    "build": "vite build --base=/IDR_Game/",
     "server": "tsx src/server/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,9 +1,9 @@
 import { World } from "./world";
 import { Character, Player } from "./character";
 import { checkRectangleCollision } from "./helpers";
-import { Rectangle, Vector2 } from "./utilities";
+import { Rectangle } from "./utilities";
 import { inputKeys } from "./utilities";
-import { canvas } from "./globalVar";
+import { assetUrl, canvas } from "./globalVar";
 
 class InteractionHandler {
     world: World;
@@ -18,26 +18,21 @@ class InteractionHandler {
         this.isViewOpen = false;
         this.isViewAvailable = false;
         this.viewImage = new Image();
-        this.viewImage.src = "images/scenery/view_1.png"
+        this.viewImage.src = assetUrl("images/scenery/view_1.png")
     }
-    tick = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
-        // console.log(" fds", this.world.viewPoints);
+    tick = (ctx: CanvasRenderingContext2D) => {
+        this.isViewAvailable = false;
         this.world.viewPoints.forEach((p) => {
-            // console.log(" uuiiiinterat");
-            
             const pRect: Rectangle = {
-                x:p.x * 2 + worldPos.x, 
-                y: p.y * 2 + worldPos.y, 
-                width: p.width, 
-                height: p.height
+                // Tiled object coordinates are in 16px map units; world space uses 32px units.
+                x: p.x * 2,
+                y: p.y * 2,
+                width: p.width * 2,
+                height: p.height * 2
             };
-            // ctx.fillRect(pRect.x, pRect.y, 32, 32);
-            // ctx.fillRect(this.character.getCollisionBox().x, this.character.getCollisionBox().y, 32, 32);
             if (checkRectangleCollision(pRect, this.character.getCollisionBox())) {
-                if (!this.isViewAvailable) {
-                    this.isViewAvailable = true;
-                }
-                if (inputKeys.has("i") && this.isViewOpen == false) {
+                this.isViewAvailable = true;
+                if (inputKeys.has("i") && !this.isViewOpen) {
                     this.isViewOpen = true;
                     const imgSrc = p.properties.find((item) => item.name === "imgSrc")?.value;
                     if (typeof imgSrc === "string") {
@@ -45,20 +40,17 @@ class InteractionHandler {
                     }
                 }
             }
-            if (this.isViewAvailable) {
-                ctx.fillStyle = "white";
-                ctx.font = "20px Arial";
-                ctx.fillText("press I to open view", 10, 50);
-                ctx.fillStyle = "black";
-            }
-            this.isViewAvailable = false;
         })
+        if (this.isViewAvailable) {
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.fillText("press I to open view", 10, 50);
+        }
         if (this.isViewOpen) {
             ctx.drawImage(this.viewImage, 0, 0, canvas.width, canvas.height);
 
         }
-        if (inputKeys.has("iu") && this.isViewOpen == true) {
-            console.log("view close");
+        if (inputKeys.has("iu") && this.isViewOpen) {
             this.isViewOpen = false;
         }
     }
