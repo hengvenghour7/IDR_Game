@@ -1,7 +1,7 @@
 import { Character, Player, Animal } from "./character"
 import { inputKeys, Vector2 } from "./utilities";
 import { World } from "./world";
-import { canvas, GLOBAL_SCALE } from "./globalVar";
+import { assetUrl, canvas, GLOBAL_SCALE } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
 import { checkRectangleCollision } from "./helpers";
 
@@ -31,9 +31,9 @@ class Game {
             // canvas.width = canvas.clientWidth;
             // canvas.height = canvas.clientHeight;
         })  
-        this.world = new World("/images/world.png");
-        this.player = new Player("/images/character.png");
-        this.dog = new Animal("/images/animal.png");
+        this.world = new World(assetUrl("images/world.png"));
+        this.player = new Player(assetUrl("images/character.png"));
+        this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
     }
     tick = (deltaTime: number) => {
@@ -54,8 +54,8 @@ class Game {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
-            `/images/${destinationMap}.png`,
-            `/map_properties/${destinationMap}.tmj`
+            assetUrl(`images/${destinationMap}.png`),
+            assetUrl(`map_properties/${destinationMap}.tmj`)
         );
         try {
             await nextWorld.prepare();

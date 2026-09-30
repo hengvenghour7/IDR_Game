@@ -3,7 +3,7 @@ import { Character, Player } from "./character";
 import { checkRectangleCollision } from "./helpers";
 import { Rectangle } from "./utilities";
 import { inputKeys } from "./utilities";
-import { canvas } from "./globalVar";
+import { assetUrl, canvas } from "./globalVar";
 
 class InteractionHandler {
     world: World;
@@ -18,7 +18,7 @@ class InteractionHandler {
         this.isViewOpen = false;
         this.isViewAvailable = false;
         this.viewImage = new Image();
-        this.viewImage.src = "images/scenery/view_1.png"
+        this.viewImage.src = assetUrl("images/scenery/view_1.png")
     }
     tick = (ctx: CanvasRenderingContext2D) => {
         this.isViewAvailable = false;

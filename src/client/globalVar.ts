@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 const TILE_SIZE: number = 32;
 const BASE_TILE_SIZE: number = 16;
 const WORLD_SCALE_FACTOR: number = 2;
@@ -8,11 +10,14 @@ const canvas = document.getElementById("game_canvas") as HTMLCanvasElement;
 canvas.width = canvas.clientWidth;
 canvas.height = 800;
 
+const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
+
 export {
     TILE_SIZE,
     BASE_TILE_SIZE,
     WORLD_SCALE_FACTOR,
     CHARACTER_TILE_SIZE,
     GLOBAL_SCALE,
-    canvas
+    canvas,
+    assetUrl
 }

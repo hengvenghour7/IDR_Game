@@ -1,6 +1,6 @@
 import { Layer, MapSwitcherType, Vector2, ViewPointType } from "./utilities";
 import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
-import { GLOBAL_SCALE } from "./globalVar";
+import { assetUrl, GLOBAL_SCALE } from "./globalVar";
 
 class World {
     worldTexture: HTMLImageElement;
@@ -11,7 +11,7 @@ class World {
     mapSwitchers: MapSwitcherType[] = [];
     private mapDataPromise: Promise<void>;
 
-    constructor(imgSrc: string, mapDataSrc = "/map_properties/world.tmj")
+    constructor(imgSrc: string, mapDataSrc = assetUrl("map_properties/world.tmj"))
     {
         this.worldTexture = new Image();
         this.worldTexture.src = imgSrc;
@@ -20,7 +20,7 @@ class World {
         this.viewPoints = [];
         this.mapDataPromise = this.loadMapData(mapDataSrc);
     }
-    loadMapData = async (mapDataSrc = "/map_properties/world.tmj") => {
+    loadMapData = async (mapDataSrc = assetUrl("map_properties/world.tmj")) => {
         const j = await readJsonFile(mapDataSrc);
         const data = getElementFromJsonByNameField(j, "collision");
         const viewPointsData = getElementFromJsonByNameField(j, "view_point");
