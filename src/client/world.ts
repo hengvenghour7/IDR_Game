@@ -1,5 +1,6 @@
 import { Layer, MapSwitcherType, Vector2, ViewPointType } from "./utilities";
 import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
+import { GLOBAL_SCALE } from "./globalVar";
 
 class World {
     worldTexture: HTMLImageElement;
@@ -35,7 +36,7 @@ class World {
     }
     prepare = () => this.mapDataPromise;
     draw = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
-        ctx.drawImage(this.worldTexture, worldPos.x, worldPos.y, 1600 * 2, 1280 * 2)
+        ctx.drawImage(this.worldTexture, worldPos.x * GLOBAL_SCALE, worldPos.y * GLOBAL_SCALE, 1600 * 2 * GLOBAL_SCALE, 1280 * 2 * GLOBAL_SCALE)
         // this.collisionData.forEach((d, j) => {
         //     d.forEach((item, i) => {
         //         if (item !== 0) {

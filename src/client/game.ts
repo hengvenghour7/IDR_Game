@@ -1,7 +1,7 @@
 import { Character, Player, Animal } from "./character"
 import { inputKeys, Vector2 } from "./utilities";
 import { World } from "./world";
-import { canvas } from "./globalVar";
+import { canvas, GLOBAL_SCALE } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
 import { checkRectangleCollision } from "./helpers";
 
@@ -47,7 +47,7 @@ class Game {
         this.drawMapSwitchers();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
-        this.interactionHandler.tick(ctx, this.player.getWorldPos());
+        this.interactionHandler.tick(ctx);
     }
     changeworld = async (destinationMap: "world" | "world_2") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
@@ -81,8 +81,8 @@ class Game {
         this.arrivalSwitcherId = arrivalSwitcher.id;
         // The player's camera offset is the inverse of their map position.
         this.player.worldPos = {
-            x: destination.x - canvas.clientWidth / 2,
-            y: destination.y - canvas.clientHeight / 2
+            x: destination.x - canvas.width / (2 * GLOBAL_SCALE),
+            y: destination.y - canvas.height / (2 * GLOBAL_SCALE)
         };
         // Keep the dog near the player; its position is stored in world space too.
         this.dog.worldPos = {
@@ -99,8 +99,8 @@ class Game {
     private checkMapSwitchers = () => {
         if (this.isChangingWorld) return;
         const playerBox = {
-            x: this.player.worldPos.x + canvas.clientWidth / 2,
-            y: this.player.worldPos.y + canvas.clientHeight / 2,
+            x: this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE),
+            y: this.player.worldPos.y + canvas.height / (2 * GLOBAL_SCALE),
             width: this.player.collisionBox.width,
             height: this.player.collisionBox.height
         };
@@ -132,10 +132,10 @@ class Game {
         ctx.lineWidth = 3;
         const cameraOffset = this.player.getWorldPos();
         this.world.mapSwitchers.forEach((switcher) => {
-            const x = switcher.x * 2 + cameraOffset.x;
-            const y = switcher.y * 2 + cameraOffset.y;
-            const width = switcher.width * 2;
-            const height = switcher.height * 2;
+            const x = (switcher.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
+            const y = (switcher.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
+            const width = switcher.width * 2 * GLOBAL_SCALE;
+            const height = switcher.height * 2 * GLOBAL_SCALE;
             ctx.fillRect(x, y, width, height);
             ctx.strokeRect(x, y, width, height);
         });
@@ -147,7 +147,7 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 ctx.imageSmoothingEnabled = false;
 
 const game = new Game();
-const prepared = game.prepareWorld();
+game.prepareWorld();
 const animate = (currentTime: number = 0) => {
     deltaTime = (currentTime - previousTime) / 1000;
     previousTime = currentTime;
