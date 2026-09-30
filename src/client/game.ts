@@ -38,6 +38,7 @@ class Game {
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "BLACK"
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         this.player.tick(deltaTime, this.world.collisionData);
         this.checkMapSwitchers();
