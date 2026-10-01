@@ -1,9 +1,10 @@
 import { Character, Player, Animal } from "./character"
 import { inputKeys, Vector2 } from "./utilities";
 import { World } from "./world";
-import { assetUrl, canvas, GLOBAL_SCALE } from "./globalVar";
+import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
 import { checkRectangleCollision } from "./helpers";
+import { MobileUI } from "./UI";
 
 let previousTime = 0;
 let deltaTime = 0;
@@ -16,8 +17,12 @@ class Game {
     currentMap: "world" | "world_2" = "world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
+    mobileUI: MobileUI;
+    isMobileScreen: boolean;
     
     constructor() {
+        this.isMobileScreen = false;
+
         window.addEventListener("keypress", (e) => {
             inputKeys.add(e.key);
             inputKeys.delete(e.key+"u");
@@ -26,15 +31,21 @@ class Game {
             inputKeys.delete(e.key);
             inputKeys.add(e.key+"u");
         })
-        window.addEventListener("resize", (e) => {
-            // console.log("resize ", canvas.clientWidth);
-            // canvas.width = canvas.clientWidth;
-            // canvas.height = canvas.clientHeight;
-        })  
-        this.world = new World(assetUrl("images/world.png"));
+        window.addEventListener("resize", () => {
+            resizeCanvas();
+            if (canvas.clientWidth < 800) {
+                this.isMobileScreen = true;
+            } else {
+                this.isMobileScreen = false;
+            }
+            ctx.imageSmoothingEnabled = false;
+            this.mobileUI.resize();
+        });
+        this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
+        this.mobileUI = new MobileUI;
     }
     tick = (deltaTime: number) => {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
@@ -48,7 +59,11 @@ class Game {
         this.drawMapSwitchers();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
+        this.world.drawFront(ctx, this.player.getWorldPos());
         this.interactionHandler.tick(ctx);
+        if (this.isMobileScreen) {
+            this.mobileUI.draw(ctx);
+        }
     }
     changeworld = async (destinationMap: "world" | "world_2") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;

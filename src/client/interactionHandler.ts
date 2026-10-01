@@ -47,7 +47,24 @@ class InteractionHandler {
             ctx.fillText("press I to open view", 10, 50);
         }
         if (this.isViewOpen) {
-            ctx.drawImage(this.viewImage, 0, 0, canvas.width, canvas.height);
+            if (this.viewImage.complete && this.viewImage.naturalWidth > 0) {
+                const scale = Math.min(
+                    canvas.width / this.viewImage.naturalWidth,
+                    canvas.height / this.viewImage.naturalHeight
+                );
+                const width = this.viewImage.naturalWidth * scale;
+                const height = this.viewImage.naturalHeight * scale;
+                ctx.fillStyle = "BLACK";
+                ctx.fillRect(0,0, canvas.clientWidth, canvas.clientHeight);
+                ctx.drawImage(
+                    this.viewImage,
+                    (canvas.width - width) / 2,
+                    (canvas.height - height) / 2,
+                    width,
+                    height
+                );
+                ctx.restore();
+            }
 
         }
         if (inputKeys.has("iu") && this.isViewOpen) {

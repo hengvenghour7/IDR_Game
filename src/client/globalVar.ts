@@ -7,8 +7,14 @@ const CHARACTER_TILE_SIZE: number = 32;
 const GLOBAL_SCALE: number = 1.5;
 
 const canvas = document.getElementById("game_canvas") as HTMLCanvasElement;
-canvas.width = canvas.clientWidth;
-canvas.height = 800;
+const resizeCanvas = () => {
+    const bounds = canvas.getBoundingClientRect();
+    if (bounds.width > 0 && bounds.height > 0) {
+        canvas.width = Math.round(bounds.width);
+        canvas.height = Math.round(bounds.height);
+    }
+};
+resizeCanvas();
 
 const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
 
@@ -19,5 +25,6 @@ export {
     CHARACTER_TILE_SIZE,
     GLOBAL_SCALE,
     canvas,
-    assetUrl
+    assetUrl,
+    resizeCanvas,
 }

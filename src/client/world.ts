@@ -10,11 +10,14 @@ class World {
     viewPoints: ViewPointType[];
     mapSwitchers: MapSwitcherType[] = [];
     private mapDataPromise: Promise<void>;
+    frontTexture: HTMLImageElement;
 
-    constructor(imgSrc: string, mapDataSrc = assetUrl("map_properties/world.tmj"))
+    constructor(imgSrc: string, frontImageSrc: string = "", mapDataSrc = assetUrl("map_properties/world.tmj"))
     {
         this.worldTexture = new Image();
         this.worldTexture.src = imgSrc;
+        this.frontTexture = new Image();
+        this.frontTexture.src = frontImageSrc;
         this.width = 100;
         this.height = 80;
         this.viewPoints = [];
@@ -37,6 +40,16 @@ class World {
     prepare = () => this.mapDataPromise;
     draw = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
         ctx.drawImage(this.worldTexture, worldPos.x * GLOBAL_SCALE, worldPos.y * GLOBAL_SCALE, 1600 * 2 * GLOBAL_SCALE, 1280 * 2 * GLOBAL_SCALE)
+        // this.collisionData.forEach((d, j) => {
+        //     d.forEach((item, i) => {
+        //         if (item !== 0) {
+        //             ctx.fillRect(i * 32, j * 32, 32, 32);
+        //         }
+        //     })
+        // })
+    }
+    drawFront = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
+        ctx.drawImage(this.frontTexture, worldPos.x * GLOBAL_SCALE, worldPos.y * GLOBAL_SCALE, 1600 * 2 * GLOBAL_SCALE, 1280 * 2 * GLOBAL_SCALE)
         // this.collisionData.forEach((d, j) => {
         //     d.forEach((item, i) => {
         //         if (item !== 0) {
