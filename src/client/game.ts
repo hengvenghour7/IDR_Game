@@ -41,7 +41,7 @@ class Game {
             ctx.imageSmoothingEnabled = false;
             this.mobileUI.resize();
         });
-        this.world = new World(assetUrl("images/world.png"));
+        this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
@@ -59,6 +59,7 @@ class Game {
         this.drawMapSwitchers();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
+        this.world.drawFront(ctx, this.player.getWorldPos());
         this.interactionHandler.tick(ctx);
         if (this.isMobileScreen) {
             this.mobileUI.draw(ctx);
