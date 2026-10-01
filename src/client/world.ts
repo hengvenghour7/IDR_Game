@@ -49,6 +49,9 @@ class World {
         // })
     }
     drawFront = (ctx: CanvasRenderingContext2D, worldPos: Vector2) => {
+        if (!this.frontTexture.src || !this.frontTexture.complete || this.frontTexture.naturalWidth === 0) {
+            return;
+        }
         ctx.drawImage(this.frontTexture, worldPos.x * GLOBAL_SCALE, worldPos.y * GLOBAL_SCALE, 1600 * 2 * GLOBAL_SCALE, 1280 * 2 * GLOBAL_SCALE)
         // this.collisionData.forEach((d, j) => {
         //     d.forEach((item, i) => {

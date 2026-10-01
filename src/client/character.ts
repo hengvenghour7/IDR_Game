@@ -142,7 +142,6 @@ class Player extends Character {
     override tick = (deltaTime: number, worldCollisionData: Array<Array<number>>) => {
         this.collisionBox.x = this.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
         this.collisionBox.y = this.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
-        // console.log("world pos ", this.collisionBox)
         let direction: Vector2 = {x:0, y:0};
         if (inputKeys.has("d")) {
             direction.x = 1;
@@ -172,7 +171,6 @@ class Player extends Character {
         };
     };
     override draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
-        console.log(this.row);
         
         ctx.drawImage(this.characterImage, this.currentFrame * 32, this.row * 32, 32, 32 , canvas.width / 2, canvas.height / 2, 32 * GLOBAL_SCALE, 32 * GLOBAL_SCALE);
         this.updateAnimationTime += deltaTime;
@@ -267,7 +265,6 @@ class Animal extends BaseCharacter {
 
         this.updateCharacterState(directionNormalize, PlayerState.Walking);
         this.updateAnimation();
-        console.log(this.directionState);
         
         let direction = vector2Scale(directionNormalize, this.speed * deltaTime)
         // if (this.worldPos.x < targetPos.x - 32 && this.worldPos.y < targetPos.y - 32) {

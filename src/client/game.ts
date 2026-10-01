@@ -19,6 +19,7 @@ class Game {
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
     isMobileScreen: boolean;
+    isTouchDevice: boolean;
     
     constructor() {
         this.isMobileScreen = false;
@@ -32,15 +33,18 @@ class Game {
             inputKeys.add(e.key+"u");
         })
         window.addEventListener("resize", () => {
+            // Save the player's map-space position before the canvas center changes.
+            const playerMapX = this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
+            const playerMapY = this.player.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
             resizeCanvas();
-            if (canvas.clientWidth < 800) {
-                this.isMobileScreen = true;
-            } else {
-                this.isMobileScreen = false;
-            }
+            // worldPos is the camera offset, so compensate for the new screen center.
+            this.player.worldPos.x = playerMapX - canvas.width / (2 * GLOBAL_SCALE);
+            this.player.worldPos.y = playerMapY - canvas.height / (2 * GLOBAL_SCALE);
             ctx.imageSmoothingEnabled = false;
             this.mobileUI.resize();
         });
+
+        this.isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -61,7 +65,7 @@ class Game {
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
         this.interactionHandler.tick(ctx);
-        if (this.isMobileScreen) {
+        if (this.isTouchDevice) {
             this.mobileUI.draw(ctx);
         }
     }
@@ -70,6 +74,7 @@ class Game {
         this.isChangingWorld = true;
         const nextWorld = new World(
             assetUrl(`images/${destinationMap}.png`),
+            destinationMap === "world" ? assetUrl("images/world_front.png") : "",
             assetUrl(`map_properties/${destinationMap}.tmj`)
         );
         try {
