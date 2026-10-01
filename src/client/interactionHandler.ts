@@ -54,6 +54,8 @@ class InteractionHandler {
                 );
                 const width = this.viewImage.naturalWidth * scale;
                 const height = this.viewImage.naturalHeight * scale;
+                ctx.fillStyle = "BLACK";
+                ctx.fillRect(0,0, canvas.clientWidth, canvas.clientHeight);
                 ctx.drawImage(
                     this.viewImage,
                     (canvas.width - width) / 2,
@@ -61,6 +63,7 @@ class InteractionHandler {
                     width,
                     height
                 );
+                ctx.restore();
             }
 
         }

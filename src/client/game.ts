@@ -18,8 +18,11 @@ class Game {
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
+    isMobileScreen: boolean;
     
     constructor() {
+        this.isMobileScreen = false;
+
         window.addEventListener("keypress", (e) => {
             inputKeys.add(e.key);
             inputKeys.delete(e.key+"u");
@@ -30,6 +33,11 @@ class Game {
         })
         window.addEventListener("resize", () => {
             resizeCanvas();
+            if (canvas.clientWidth < 800) {
+                this.isMobileScreen = true;
+            } else {
+                this.isMobileScreen = false;
+            }
             ctx.imageSmoothingEnabled = false;
             this.mobileUI.resize();
         });
@@ -52,7 +60,9 @@ class Game {
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.interactionHandler.tick(ctx);
-        this.mobileUI.draw(ctx);
+        if (this.isMobileScreen) {
+            this.mobileUI.draw(ctx);
+        }
     }
     changeworld = async (destinationMap: "world" | "world_2") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;

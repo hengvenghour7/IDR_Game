@@ -26,5 +26,5 @@ export {
     GLOBAL_SCALE,
     canvas,
     assetUrl,
-    resizeCanvas
+    resizeCanvas,
 }
