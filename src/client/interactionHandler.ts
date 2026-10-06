@@ -44,7 +44,7 @@ class InteractionHandler {
         if (this.isViewAvailable) {
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
-            ctx.fillText("press I to open view", 10, 50);
+            ctx.fillText("Hold I to open view", 10, 50);
         }
         if (this.isViewOpen) {
             if (this.viewImage.complete && this.viewImage.naturalWidth > 0) {

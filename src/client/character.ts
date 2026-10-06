@@ -138,10 +138,11 @@ class Player extends Character {
     constructor(textureSrc: string) {
         super(textureSrc);
         this.worldPos = {x:200, y:600};
+        // The sprite has transparent padding, so only its feet need to collide.
+        this.collisionBox = {x: 0, y: 0, width: 14, height: 10};
     }
     override tick = (deltaTime: number, worldCollisionData: Array<Array<number>>) => {
-        this.collisionBox.x = this.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
-        this.collisionBox.y = this.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
+        this.updateCollisionBox();
         let direction: Vector2 = {x:0, y:0};
         if (inputKeys.has("d")) {
             direction.x = 1;
@@ -155,21 +156,24 @@ class Player extends Character {
         if (inputKeys.has("w")) {
             direction.y = -1;
         }
+        this.updateCharacterState(direction, PlayerState.Walking);
+        this.updateAnimation();
+        const movement = vector2Scale(vector2Normalize(direction), deltaTime * this.speed);
         if (!checkIsCollisionTile(
-                worldCollisionData, 
-                getFutureCollisionBox(this.collisionBox, direction)
+                worldCollisionData,
+                getFutureCollisionBox(this.collisionBox, movement)
                 )
-            )
-        {
-            this.updateCharacterState(direction, PlayerState.Walking);
-            this.updateAnimation();
-            direction = vector2Scale(vector2Normalize(direction), deltaTime * this.speed) 
+            ) {
+            direction = movement;
             this.worldPos.x += direction.x;
             this.worldPos.y += direction.y;
-            this.collisionBox.x = this.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
-            this.collisionBox.y = this.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
-        };
+            this.updateCollisionBox();
+        }
     };
+    private updateCollisionBox = () => {
+        this.collisionBox.x = this.worldPos.x + canvas.width / (2 * GLOBAL_SCALE) + 9;
+        this.collisionBox.y = this.worldPos.y + canvas.height / (2 * GLOBAL_SCALE) + 20;
+    }
     override draw = (ctx: CanvasRenderingContext2D, deltaTime: number) => {
         
         ctx.drawImage(this.characterImage, this.currentFrame * 32, this.row * 32, 32, 32 , canvas.width / 2, canvas.height / 2, 32 * GLOBAL_SCALE, 32 * GLOBAL_SCALE);
