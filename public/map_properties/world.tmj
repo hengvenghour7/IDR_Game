@@ -729,7 +729,7 @@
          "offsety":-4,
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":100,
          "x":0,
          "y":0
@@ -747,8 +747,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":552.666666666667,
-                 "y":772.666666666667
+                 "x":552.667,
+                 "y":772.667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -761,40 +761,6 @@
          "id":5,
          "name":"view_point",
          "objects":[
-                {
-                 "height":16,
-                 "id":3,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"imgSrc",
-                         "type":"string",
-                         "value":"images\/scenery\/view_1.png"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":474,
-                 "y":173.333
-                }, 
-                {
-                 "height":16,
-                 "id":7,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"imgSrc",
-                         "type":"string",
-                         "value":"images\/scenery\/view_1.png"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":194,
-                 "y":180.667
-                }, 
                 {
                  "height":16,
                  "id":8,
@@ -811,23 +777,6 @@
                  "width":16,
                  "x":422,
                  "y":904.333
-                }, 
-                {
-                 "height":16,
-                 "id":9,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"imgSrc",
-                         "type":"string",
-                         "value":"images\/scenery\/view_2.png"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":302.667,
-                 "y":239.333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -854,8 +803,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":732.666663333333,
-                 "y":814.000333333333
+                 "x":732.667,
+                 "y":814
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -939,8 +888,8 @@
                  "type":"",
                  "visible":true,
                  "width":144,
-                 "x":354.666666666667,
-                 "y":1026.667
+                 "x":354.667,
+                 "y":1026.67
                 }, 
                 {
                  "height":144,
@@ -977,7 +926,7 @@
                  "visible":true,
                  "width":144,
                  "x":604.667,
-                 "y":1117.99666666667
+                 "y":1118
                 }, 
                 {
                  "height":144,
