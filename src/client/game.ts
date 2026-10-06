@@ -20,6 +20,8 @@ class Game {
     mobileUI: MobileUI;
     isMobileScreen: boolean;
     isTouchDevice: boolean;
+    private readonly startScreenImage = new Image();
+    private gameStarted = false;
     
     constructor() {
         this.isMobileScreen = false;
@@ -45,6 +47,8 @@ class Game {
         });
 
         this.isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+        this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
+        canvas.addEventListener("pointerdown", this.handleStartPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -55,12 +59,17 @@ class Game {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "BLACK"
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (!this.gameStarted) {
+            this.drawStartScreen();
+            return;
+        }
         this.player.tick(deltaTime, this.world.collisionData);
         this.checkMapSwitchers();
         this.dog.approachTarget(this.player, deltaTime);
         
         this.world.draw(ctx, this.player.getWorldPos());
         this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), deltaTime);
+        this.drawViewPoints();
         this.drawMapSwitchers();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
@@ -69,6 +78,51 @@ class Game {
         if (this.isTouchDevice) {
             this.mobileUI.draw(ctx);
         }
+    }
+    private handleStartPointer = (event: PointerEvent) => {
+        if (this.gameStarted) return;
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const button = this.getStartButtonBounds();
+        if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
+            this.gameStarted = true;
+        }
+    }
+    private getStartButtonBounds = () => ({
+        x: canvas.width / 2 - 110,
+        y: canvas.height * 0.76 - 30,
+        width: 220,
+        height: 60
+    });
+    private drawStartScreen = () => {
+        if (!this.startScreenImage.complete || this.startScreenImage.naturalWidth === 0) return;
+        const coverScale = Math.max(canvas.width / this.startScreenImage.naturalWidth, canvas.height / this.startScreenImage.naturalHeight);
+        const width = this.startScreenImage.naturalWidth * coverScale;
+        const height = this.startScreenImage.naturalHeight * coverScale;
+        ctx.save();
+        ctx.drawImage(this.startScreenImage, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+        ctx.fillStyle = "rgba(13, 20, 19, 0.38)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fff4df";
+        // ctx.shadowColor = "rgba(0,0,0,0.65)";
+        // ctx.shadowBlur = 14;
+        ctx.font = `bold ${Math.max(38, Math.min(38, canvas.width * 0.085))}px Arial`;
+        ctx.fillText("Oil Museum path Finder", canvas.width / 2, canvas.height * 0.3);
+        // ctx.shadowBlur = 0;
+        const button = this.getStartButtonBounds();
+        ctx.fillStyle = "BLACK";
+        ctx.beginPath();
+        ctx.roundRect(button.x, button.y, button.width, button.height, 12);
+        ctx.fill();
+        ctx.strokeStyle = "#ffbd75";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = "white";
+        ctx.font = "bold 24px Arial";
+        ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
+        ctx.restore();
     }
     changeworld = async (destinationMap: "world" | "world_2") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
@@ -117,6 +171,15 @@ class Game {
     }
     prepareWorld = async () => {
         await this.world.prepare();
+        const startingPoint = this.world.startingPoints[0];
+        if (startingPoint) {
+            const playerMapX = (startingPoint.x + startingPoint.width / 2) * 2;
+            const playerMapY = (startingPoint.y + startingPoint.height / 2) * 2;
+            this.player.worldPos = {
+                x: playerMapX - canvas.width / (2 * GLOBAL_SCALE),
+                y: playerMapY - canvas.height / (2 * GLOBAL_SCALE)
+            };
+        }
     }
     private checkMapSwitchers = () => {
         if (this.isChangingWorld) return;
@@ -158,6 +221,25 @@ class Game {
             const y = (switcher.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
             const width = switcher.width * 2 * GLOBAL_SCALE;
             const height = switcher.height * 2 * GLOBAL_SCALE;
+            ctx.fillRect(x, y, width, height);
+            ctx.strokeRect(x, y, width, height);
+        });
+        ctx.restore();
+    }
+
+    private drawViewPoints = () => {
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 140, 0, 0.3)";
+        ctx.strokeStyle = "orange";
+        ctx.lineWidth = 3;
+        const cameraOffset = this.player.getWorldPos();
+        this.world.viewPoints.forEach((point) => {
+            if (!point.visible) return;
+
+            const x = (point.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
+            const y = (point.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
+            const width = point.width * 2 * GLOBAL_SCALE;
+            const height = point.height * 2 * GLOBAL_SCALE;
             ctx.fillRect(x, y, width, height);
             ctx.strokeRect(x, y, width, height);
         });

@@ -8,6 +8,7 @@ class World {
     width: number;
     height: number;
     viewPoints: ViewPointType[];
+    startingPoints: ViewPointType[] = [];
     mapSwitchers: MapSwitcherType[] = [];
     animatedSprites: Array<{ object: AnimatedSpriteType; image: HTMLImageElement }> = [];
     private animationTime = 0;
@@ -29,6 +30,7 @@ class World {
         const j = await readJsonFile(mapDataSrc);
         const data = getElementFromJsonByNameField(j, "collision");
         const viewPointsData = getElementFromJsonByNameField(j, "view_point");
+        const startingPointsData = getElementFromJsonByNameField(j, "starting_point");
         const mapSwitchersData = getElementFromJsonByNameField(j, "map_switcher");
         const animatedSpritesData = j.layers.find((layer: Layer) =>
             layer.name === "animated_sprite" || layer.name === "animate_sprite"
@@ -39,6 +41,7 @@ class World {
         this.width = data.width;
         this.height = data.height;
         this.viewPoints = viewPointsData?.objects ?? [];
+        this.startingPoints = startingPointsData?.objects ?? [];
         this.mapSwitchers = mapSwitchersData?.objects ?? [];
         this.animatedSprites = (animatedSpritesData?.objects ?? []).map((object: AnimatedSpriteType) => {
             const image = new Image();
