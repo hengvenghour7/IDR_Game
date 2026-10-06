@@ -26,6 +26,18 @@ interface PropertyType {
     type: string;
     value: string | number;
 }
+interface AnimatedSpriteType {
+    height: number;
+    id: number;
+    name: string;
+    rotation: number;
+    type: string;
+    visible: boolean;
+    width: number;
+    x: number;
+    y: number;
+    properties: PropertyType[];
+}
 interface ViewPointType {
     height: number;
     id: number;
@@ -46,5 +58,6 @@ export {
     Rectangle,
     Layer,
     ViewPointType,
-    MapSwitcherType
+    MapSwitcherType,
+    AnimatedSpriteType
 }

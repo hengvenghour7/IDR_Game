@@ -60,6 +60,7 @@ class Game {
         this.dog.approachTarget(this.player, deltaTime);
         
         this.world.draw(ctx, this.player.getWorldPos());
+        this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), deltaTime);
         this.drawMapSwitchers();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
