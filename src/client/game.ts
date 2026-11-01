@@ -14,13 +14,14 @@ class Game {
     world: World;
     dog: Animal;
     interactionHandler: InteractionHandler;
-    currentMap: "world" | "world_2" = "world";
+    currentMap: "world" | "world_2" | "port_world" = "world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
     isMobileScreen: boolean;
     isTouchDevice: boolean;
     private readonly startScreenImage = new Image();
+    private readonly backgroundMusic = new Audio(assetUrl("sounds/10 - Dark Castle.ogg"));
     private gameStarted = false;
     
     constructor() {
@@ -47,6 +48,8 @@ class Game {
         });
 
         this.isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+        this.backgroundMusic.loop = true;
+        this.backgroundMusic.volume = 0.35;
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
@@ -87,6 +90,9 @@ class Game {
         const button = this.getStartButtonBounds();
         if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
             this.gameStarted = true;
+            void this.backgroundMusic.play().catch((error: unknown) => {
+                console.warn("Unable to start background music:", error);
+            });
         }
     }
     private getStartButtonBounds = () => ({
@@ -124,7 +130,7 @@ class Game {
         ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
         ctx.restore();
     }
-    changeworld = async (destinationMap: "world" | "world_2") => {
+    changeworld = async (destinationMap: "world" | "world_2" | "port_world") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
@@ -204,7 +210,7 @@ class Game {
         if (!switcher) return;
 
         const destinationMap = switcher.properties.find((property) => property.name === "targetMap")?.value;
-        if (destinationMap !== "world" && destinationMap !== "world_2") {
+        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world") {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }
