@@ -14,7 +14,7 @@ class Game {
     world: World;
     dog: Animal;
     interactionHandler: InteractionHandler;
-    currentMap: "world" | "world_2" | "port_world" = "world";
+    currentMap: "world" | "world_2" | "port_world" | "reflection_world" = "world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
@@ -35,6 +35,12 @@ class Game {
             inputKeys.delete(e.key);
             inputKeys.add(e.key+"u");
         })
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !this.gameStarted) {
+                event.preventDefault();
+                this.startGame();
+            }
+        });
         window.addEventListener("resize", () => {
             // Save the player's map-space position before the canvas center changes.
             const playerMapX = this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
@@ -89,11 +95,15 @@ class Game {
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
         const button = this.getStartButtonBounds();
         if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
-            this.gameStarted = true;
-            void this.backgroundMusic.play().catch((error: unknown) => {
-                console.warn("Unable to start background music:", error);
-            });
+            this.startGame();
         }
+    }
+    private startGame = () => {
+        if (this.gameStarted) return;
+        this.gameStarted = true;
+        void this.backgroundMusic.play().catch((error: unknown) => {
+            console.warn("Unable to start background music:", error);
+        });
     }
     private getStartButtonBounds = () => ({
         x: canvas.width / 2 - 110,
@@ -130,7 +140,7 @@ class Game {
         ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
         ctx.restore();
     }
-    changeworld = async (destinationMap: "world" | "world_2" | "port_world") => {
+    changeworld = async (destinationMap: "world" | "world_2" | "port_world" | "reflection_world") => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
@@ -210,7 +220,7 @@ class Game {
         if (!switcher) return;
 
         const destinationMap = switcher.properties.find((property) => property.name === "targetMap")?.value;
-        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world") {
+        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world") {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }
