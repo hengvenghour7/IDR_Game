@@ -195,6 +195,21 @@
                  "name":"",
                  "properties":[
                         {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
                          "name":"targetMap",
                          "type":"string",
                          "value":"world"
@@ -203,8 +218,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":702.666666666667,
-                 "y":356.666666666667
+                 "x":702.667,
+                 "y":356.667
                 }],
          "opacity":1,
          "type":"objectgroup",

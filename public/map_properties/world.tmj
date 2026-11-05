@@ -767,9 +767,24 @@
                  "name":"",
                  "properties":[
                         {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"imgSrc",
                          "type":"string",
                          "value":"images\/scenery\/view_3.png"
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"",
@@ -780,7 +795,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -794,6 +809,21 @@
                  "id":11,
                  "name":"",
                  "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":2
+                        }, 
                         {
                          "name":"targetMap",
                          "type":"string",
@@ -811,6 +841,21 @@
                  "id":19,
                  "name":"",
                  "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":3
+                        }, 
                         {
                          "name":"targetMap",
                          "type":"string",
