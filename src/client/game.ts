@@ -21,6 +21,8 @@ class Game {
     isMobileScreen: boolean;
     isTouchDevice: boolean;
     private readonly startScreenImage = new Image();
+    private readonly helperIconImage = new Image();
+    private markerAnimationTime = 0;
     private readonly backgroundMusic = new Audio(assetUrl("sounds/10 - Dark Castle.ogg"));
     private gameStarted = false;
     
@@ -57,6 +59,7 @@ class Game {
         this.backgroundMusic.loop = true;
         this.backgroundMusic.volume = 0.35;
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
+        this.helperIconImage.src = assetUrl("images/helper_icon.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
@@ -73,6 +76,7 @@ class Game {
             return;
         }
         this.player.tick(deltaTime, this.world.collisionData);
+        this.markerAnimationTime += Math.max(0, deltaTime);
         this.checkMapSwitchers();
         this.dog.approachTarget(this.player, deltaTime);
         
@@ -125,9 +129,12 @@ class Game {
         // ctx.shadowColor = "rgba(0,0,0,0.65)";
         // ctx.shadowBlur = 14;
         ctx.font = `bold ${Math.max(38, Math.min(38, canvas.width * 0.085))}px Arial`;
-        ctx.fillText("Oil Museum path Finder", canvas.width / 2, canvas.height * 0.3);
+        ctx.fillText("Dispersed Memory", canvas.width / 2, canvas.height * 0.3);
         // ctx.shadowBlur = 0;
         const button = this.getStartButtonBounds();
+        ctx.fillStyle = "#fff4df";
+        ctx.font = "18px Arial";
+        ctx.fillText("WASD to move  •  Hold I to interact", canvas.width / 2, button.y - 24);
         ctx.fillStyle = "BLACK";
         ctx.beginPath();
         ctx.roundRect(button.x, button.y, button.width, button.height, 12);
@@ -227,39 +234,37 @@ class Game {
         this.changeworld(destinationMap);
     }
     private drawMapSwitchers = () => {
-        ctx.save();
-        ctx.fillStyle = "rgba(0, 200, 255, 0.25)";
-        ctx.strokeStyle = "#00c8ff";
-        ctx.lineWidth = 3;
         const cameraOffset = this.player.getWorldPos();
         this.world.mapSwitchers.forEach((switcher) => {
-            const x = (switcher.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
-            const y = (switcher.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
-            const width = switcher.width * 2 * GLOBAL_SCALE;
-            const height = switcher.height * 2 * GLOBAL_SCALE;
-            ctx.fillRect(x, y, width, height);
-            ctx.strokeRect(x, y, width, height);
+            this.drawMarker(switcher, cameraOffset, 1);
         });
-        ctx.restore();
     }
 
     private drawViewPoints = () => {
-        ctx.save();
-        ctx.fillStyle = "rgba(255, 140, 0, 0.3)";
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 3;
         const cameraOffset = this.player.getWorldPos();
         this.world.viewPoints.forEach((point) => {
             if (!point.visible) return;
-
-            const x = (point.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
-            const y = (point.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
-            const width = point.width * 2 * GLOBAL_SCALE;
-            const height = point.height * 2 * GLOBAL_SCALE;
-            ctx.fillRect(x, y, width, height);
-            ctx.strokeRect(x, y, width, height);
+            this.drawMarker(point, cameraOffset, 3);
         });
-        ctx.restore();
+    }
+
+    private drawMarker = (marker: { x: number; y: number; width: number; height: number; properties?: Array<{ name: string; value: string | number }> }, cameraOffset: Vector2, defaultRow: number) => {
+        if (!this.helperIconImage.complete || this.helperIconImage.naturalWidth === 0) return;
+        const property = (name: string) => marker.properties?.find((item) => item.name === name)?.value;
+        const row = Math.max(1, Math.floor(Number(property("row")) || defaultRow));
+        const colStart = Math.max(0, Math.floor(Number(property("col_start")) || 0));
+        const requestedColEnd = Number(property("col_end"));
+        const colEnd = Number.isFinite(requestedColEnd) ? Math.floor(requestedColEnd) : 3;
+        const frameCount = Math.max(1, Math.min(3, colEnd) - Math.min(2, colStart));
+        const firstFrame = Math.min(2, colStart);
+        const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+        const frameWidth = 16;
+        const frameHeight = 17;
+        const x = (marker.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
+        const y = (marker.y * 2 + cameraOffset.y) * GLOBAL_SCALE;
+        const width = marker.width * 2 * GLOBAL_SCALE;
+        const height = marker.height * 2 * GLOBAL_SCALE;
+        ctx.drawImage(this.helperIconImage, frame * frameWidth, (row - 1) * frameHeight, frameWidth, frameHeight, x, y, width, height);
     }
 }
 
