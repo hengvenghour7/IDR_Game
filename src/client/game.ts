@@ -28,6 +28,7 @@ class Game {
     private markerAnimationTime = 0;
     private readonly backgroundMusic = new Audio(assetUrl("sounds/3 - Revelation.ogg"));
     private isMusicMuted = false;
+    private musicNeedsTap = false;
     private gameStarted = false;
     
     constructor() {
@@ -126,10 +127,13 @@ class Game {
         const button = this.getSoundButtonBounds();
         if (x < button.x || x > button.x + button.size || y < button.y || y > button.y + button.size) return;
         event.preventDefault();
-        this.isMusicMuted = !this.isMusicMuted;
-        this.backgroundMusic.muted = this.isMusicMuted;
-        if (!this.isMusicMuted && this.backgroundMusic.paused) {
+        if (this.isMusicMuted || this.backgroundMusic.paused) {
+            this.isMusicMuted = false;
+            this.backgroundMusic.muted = false;
             this.playBackgroundMusic();
+        } else {
+            this.isMusicMuted = true;
+            this.backgroundMusic.muted = true;
         }
     }
     private getSoundButtonBounds = () => ({
@@ -142,6 +146,15 @@ class Game {
         if (!icon.complete || icon.naturalWidth === 0) return;
         const button = this.getSoundButtonBounds();
         context.drawImage(icon, button.x, button.y, button.size, button.size);
+        if (this.musicNeedsTap) {
+            context.save();
+            context.font = "14px Arial";
+            context.textAlign = "right";
+            context.textBaseline = "middle";
+            context.fillStyle = "#fff4df";
+            context.fillText("Tap for sound", button.x - 8, button.y + button.size / 2);
+            context.restore();
+        }
     }
     private startGame = () => {
         if (this.gameStarted) return;
@@ -150,7 +163,10 @@ class Game {
     }
     private playBackgroundMusic = () => {
         void this.backgroundMusic.play().catch((error: unknown) => {
+            this.musicNeedsTap = true;
             console.warn("Unable to start background music:", error);
+        }).then(() => {
+            if (!this.backgroundMusic.paused) this.musicNeedsTap = false;
         });
     }
     private getStartButtonBounds = () => ({
