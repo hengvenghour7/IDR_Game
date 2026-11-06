@@ -51,6 +51,9 @@ interface ViewPointType {
     properties: PropertyType[]
 }
 interface MapSwitcherType extends ViewPointType {}
+interface InfoLocationType extends ViewPointType {}
+interface GlobeType extends ViewPointType {}
+type MapName = "world" | "world_2" | "port_world" | "reflection_world" | "world_4" | "world_5";
 
 export {
     inputKeys,
@@ -59,5 +62,8 @@ export {
     Layer,
     ViewPointType,
     MapSwitcherType,
+    InfoLocationType,
+    GlobeType,
+    MapName,
     AnimatedSpriteType
 }
