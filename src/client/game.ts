@@ -1,5 +1,5 @@
 import { Character, Player, Animal } from "./character"
-import { inputKeys, Vector2 } from "./utilities";
+import { inputKeys, MapName, Vector2 } from "./utilities";
 import { World } from "./world";
 import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
@@ -14,7 +14,7 @@ class Game {
     world: World;
     dog: Animal;
     interactionHandler: InteractionHandler;
-    currentMap: "world" | "world_2" | "port_world" | "reflection_world" = "world";
+    currentMap: MapName = "world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
@@ -22,6 +22,7 @@ class Game {
     isTouchDevice: boolean;
     private readonly startScreenImage = new Image();
     private readonly helperIconImage = new Image();
+    private readonly globeIconImage = new Image();
     private markerAnimationTime = 0;
     private readonly backgroundMusic = new Audio(assetUrl("sounds/10 - Dark Castle.ogg"));
     private gameStarted = false;
@@ -60,11 +61,13 @@ class Game {
         this.backgroundMusic.volume = 0.35;
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
         this.helperIconImage.src = assetUrl("images/helper_icon.png");
+        this.globeIconImage.src = assetUrl("images/globe_icon.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
+        this.interactionHandler.onTravel = (destination) => { void this.changeworld(destination, true); };
         this.mobileUI = new MobileUI;
     }
     tick = (deltaTime: number) => {
@@ -75,7 +78,7 @@ class Game {
             this.drawStartScreen();
             return;
         }
-        this.player.tick(deltaTime, this.world.collisionData);
+        if (!this.interactionHandler.isGlobeMenuOpen) this.player.tick(deltaTime, this.world.collisionData);
         this.markerAnimationTime += Math.max(0, deltaTime);
         this.checkMapSwitchers();
         this.dog.approachTarget(this.player, deltaTime);
@@ -84,6 +87,8 @@ class Game {
         this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), deltaTime);
         this.drawViewPoints();
         this.drawMapSwitchers();
+        this.drawInfoLocations();
+        this.drawGlobes();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
@@ -134,7 +139,7 @@ class Game {
         const button = this.getStartButtonBounds();
         ctx.fillStyle = "#fff4df";
         ctx.font = "18px Arial";
-        ctx.fillText("WASD to move  •  Hold I to interact", canvas.width / 2, button.y - 24);
+        ctx.fillText("WASD to move  • Hold I to interact", canvas.width / 2, button.y - 24);
         ctx.fillStyle = "BLACK";
         ctx.beginPath();
         ctx.roundRect(button.x, button.y, button.width, button.height, 12);
@@ -147,7 +152,7 @@ class Game {
         ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
         ctx.restore();
     }
-    changeworld = async (destinationMap: "world" | "world_2" | "port_world" | "reflection_world") => {
+    changeworld = async (destinationMap: MapName, preferEntrySwitcher = false) => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
@@ -162,18 +167,22 @@ class Game {
             console.error(`Unable to load map ${destinationMap}:`, error);
             return;
         }
-        const arrivalSwitcher = nextWorld.mapSwitchers.find((item) =>
+        const rowThreeEntry = preferEntrySwitcher
+            ? nextWorld.mapSwitchers.find((item) =>
+                Number(item.properties?.find((property) => property.name === "row")?.value) === 3
+            )
+            : undefined;
+        const arrivalSwitcher = rowThreeEntry ?? nextWorld.mapSwitchers.find((item) =>
             item.properties.some((property) => property.name === "targetMap" && property.value === this.currentMap)
         );
-        if (!arrivalSwitcher) {
-            this.isChangingWorld = false;
-            console.error(`No reciprocal map switcher in ${destinationMap} points to ${this.currentMap}`);
-            return;
-        }
-        const destination = {
-            x: (arrivalSwitcher.x + arrivalSwitcher.width / 2) * 2,
-            y: (arrivalSwitcher.y + arrivalSwitcher.height / 2) * 2
-        };
+        const start = nextWorld.startingPoints[0];
+        const destination = arrivalSwitcher
+            ? { x: (arrivalSwitcher.x + arrivalSwitcher.width / 2) * 2, y: (arrivalSwitcher.y + arrivalSwitcher.height / 2) * 2 }
+            : start
+                ? { x: (start.x + start.width / 2) * 2, y: (start.y + start.height / 2) * 2 }
+                : nextWorld.mapSwitchers[0]
+                    ? { x: (nextWorld.mapSwitchers[0].x + nextWorld.mapSwitchers[0].width / 2) * 2, y: (nextWorld.mapSwitchers[0].y + nextWorld.mapSwitchers[0].height / 2) * 2 }
+                    : { x: 800, y: 640 };
         this.currentMap = destinationMap;
         this.world = nextWorld;
         this.interactionHandler.world = nextWorld;
@@ -227,7 +236,7 @@ class Game {
         if (!switcher) return;
 
         const destinationMap = switcher.properties.find((property) => property.name === "targetMap")?.value;
-        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world") {
+        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world" && destinationMap !== "world_4" && destinationMap !== "world_5") {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }
@@ -237,6 +246,38 @@ class Game {
         const cameraOffset = this.player.getWorldPos();
         this.world.mapSwitchers.forEach((switcher) => {
             this.drawMarker(switcher, cameraOffset, 1);
+        });
+    }
+
+    private drawInfoLocations = () => {
+        const cameraOffset = this.player.getWorldPos();
+        this.world.infoLocations.forEach((location) => {
+            if (!location.visible) return;
+            this.drawMarker(location, cameraOffset, 1);
+        });
+    }
+
+    private drawGlobes = () => {
+        if (!this.globeIconImage.complete || this.globeIconImage.naturalWidth === 0) return;
+        const cameraOffset = this.player.getWorldPos();
+        this.world.globes.forEach((globe) => {
+            if (!globe.visible) return;
+            const property = (name: string) => globe.properties?.find((item) => item.name === name)?.value;
+            const firstFrame = Math.max(0, Math.min(2, Math.floor(Number(property("col_start")) || 0)));
+            const requestedLastFrame = Number(property("col_end"));
+            const lastFrame = Number.isFinite(requestedLastFrame)
+                ? Math.max(firstFrame + 1, Math.min(3, Math.floor(requestedLastFrame)))
+                : 3;
+            const frameCount = lastFrame - firstFrame;
+            const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+            ctx.drawImage(
+                this.globeIconImage,
+                frame * 16, 0, 16, 17,
+                (globe.x * 2 + cameraOffset.x) * GLOBAL_SCALE,
+                (globe.y * 2 + cameraOffset.y) * GLOBAL_SCALE,
+                globe.width * 2 * GLOBAL_SCALE,
+                globe.height * 2 * GLOBAL_SCALE
+            );
         });
     }
 
