@@ -62,6 +62,10 @@ class Game {
         this.isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
         this.backgroundMusic.loop = true;
         this.backgroundMusic.volume = 0.35;
+        this.backgroundMusic.preload = "auto";
+        this.backgroundMusic.addEventListener("error", () => {
+            console.error("Unable to load background music:", this.backgroundMusic.error);
+        });
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
         this.helperIconImage.src = assetUrl("images/helper_icon.png");
         this.globeIconImage.src = assetUrl("images/globe_icon.png");
@@ -124,6 +128,9 @@ class Game {
         event.preventDefault();
         this.isMusicMuted = !this.isMusicMuted;
         this.backgroundMusic.muted = this.isMusicMuted;
+        if (!this.isMusicMuted && this.backgroundMusic.paused) {
+            this.playBackgroundMusic();
+        }
     }
     private getSoundButtonBounds = () => ({
         x: canvas.width - 56,
@@ -139,6 +146,9 @@ class Game {
     private startGame = () => {
         if (this.gameStarted) return;
         this.gameStarted = true;
+        this.playBackgroundMusic();
+    }
+    private playBackgroundMusic = () => {
         void this.backgroundMusic.play().catch((error: unknown) => {
             console.warn("Unable to start background music:", error);
         });
