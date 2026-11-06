@@ -309,7 +309,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -336,7 +336,7 @@
                         {
                          "name":"row",
                          "type":"int",
-                         "value":3
+                         "value":2
                         }, 
                         {
                          "name":"targetMap",
@@ -347,8 +347,40 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":702.667,
-                 "y":356.667
+                 "x":1186.667,
+                 "y":445.667
+                }, 
+                {
+                 "height":16,
+                 "id":5,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"targetMap",
+                         "type":"string",
+                         "value":"birth_world"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":704.5,
+                 "y":355
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -448,7 +480,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":5,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

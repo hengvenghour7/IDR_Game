@@ -24,7 +24,7 @@ class Game {
     private readonly helperIconImage = new Image();
     private readonly globeIconImage = new Image();
     private markerAnimationTime = 0;
-    private readonly backgroundMusic = new Audio(assetUrl("sounds/10 - Dark Castle.ogg"));
+    private readonly backgroundMusic = new Audio(assetUrl("sounds/3 - Revelation.ogg"));
     private gameStarted = false;
     
     constructor() {
@@ -167,12 +167,14 @@ class Game {
             console.error(`Unable to load map ${destinationMap}:`, error);
             return;
         }
-        const rowThreeEntry = preferEntrySwitcher
+        const rowEntry = preferEntrySwitcher
             ? nextWorld.mapSwitchers.find((item) =>
                 Number(item.properties?.find((property) => property.name === "row")?.value) === 3
+            ) ?? nextWorld.mapSwitchers.find((item) =>
+                Number(item.properties?.find((property) => property.name === "row")?.value) === 2
             )
             : undefined;
-        const arrivalSwitcher = rowThreeEntry ?? nextWorld.mapSwitchers.find((item) =>
+        const arrivalSwitcher = rowEntry ?? nextWorld.mapSwitchers.find((item) =>
             item.properties.some((property) => property.name === "targetMap" && property.value === this.currentMap)
         );
         const start = nextWorld.startingPoints[0];
@@ -236,7 +238,7 @@ class Game {
         if (!switcher) return;
 
         const destinationMap = switcher.properties.find((property) => property.name === "targetMap")?.value;
-        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world" && destinationMap !== "world_4" && destinationMap !== "world_5") {
+        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world" && destinationMap !== "world_4" && destinationMap !== "world_5" && destinationMap !== "birth_world") {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }

@@ -53,7 +53,7 @@ interface ViewPointType {
 interface MapSwitcherType extends ViewPointType {}
 interface InfoLocationType extends ViewPointType {}
 interface GlobeType extends ViewPointType {}
-type MapName = "world" | "world_2" | "port_world" | "reflection_world" | "world_4" | "world_5";
+type MapName = "world" | "world_2" | "port_world" | "reflection_world" | "world_4" | "world_5" | "birth_world";
 
 export {
     inputKeys,
