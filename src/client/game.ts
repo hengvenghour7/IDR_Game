@@ -23,8 +23,11 @@ class Game {
     private readonly startScreenImage = new Image();
     private readonly helperIconImage = new Image();
     private readonly globeIconImage = new Image();
+    private readonly soundIconImage = new Image();
+    private readonly muteIconImage = new Image();
     private markerAnimationTime = 0;
-    private readonly backgroundMusic = new Audio(assetUrl("sounds/10 - Dark Castle.ogg"));
+    private readonly backgroundMusic = new Audio(assetUrl("sounds/3 - Revelation.ogg"));
+    private isMusicMuted = false;
     private gameStarted = false;
     
     constructor() {
@@ -62,7 +65,10 @@ class Game {
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
         this.helperIconImage.src = assetUrl("images/helper_icon.png");
         this.globeIconImage.src = assetUrl("images/globe_icon.png");
+        this.soundIconImage.src = assetUrl("images/sound.png");
+        this.muteIconImage.src = assetUrl("images/mute.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
+        canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -93,6 +99,7 @@ class Game {
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
         this.interactionHandler.tick(ctx);
+        this.drawSoundButton(ctx);
         if (this.isTouchDevice) {
             this.mobileUI.draw(ctx);
         }
@@ -106,6 +113,28 @@ class Game {
         if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
             this.startGame();
         }
+    }
+    private handleSoundButtonPointer = (event: PointerEvent) => {
+        if (!this.gameStarted) return;
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const button = this.getSoundButtonBounds();
+        if (x < button.x || x > button.x + button.size || y < button.y || y > button.y + button.size) return;
+        event.preventDefault();
+        this.isMusicMuted = !this.isMusicMuted;
+        this.backgroundMusic.muted = this.isMusicMuted;
+    }
+    private getSoundButtonBounds = () => ({
+        x: canvas.width - 56,
+        y: 16,
+        size: 40
+    });
+    private drawSoundButton = (context: CanvasRenderingContext2D) => {
+        const icon = this.isMusicMuted ? this.muteIconImage : this.soundIconImage;
+        if (!icon.complete || icon.naturalWidth === 0) return;
+        const button = this.getSoundButtonBounds();
+        context.drawImage(icon, button.x, button.y, button.size, button.size);
     }
     private startGame = () => {
         if (this.gameStarted) return;
@@ -167,12 +196,14 @@ class Game {
             console.error(`Unable to load map ${destinationMap}:`, error);
             return;
         }
-        const rowThreeEntry = preferEntrySwitcher
+        const rowEntry = preferEntrySwitcher
             ? nextWorld.mapSwitchers.find((item) =>
                 Number(item.properties?.find((property) => property.name === "row")?.value) === 3
+            ) ?? nextWorld.mapSwitchers.find((item) =>
+                Number(item.properties?.find((property) => property.name === "row")?.value) === 2
             )
             : undefined;
-        const arrivalSwitcher = rowThreeEntry ?? nextWorld.mapSwitchers.find((item) =>
+        const arrivalSwitcher = rowEntry ?? nextWorld.mapSwitchers.find((item) =>
             item.properties.some((property) => property.name === "targetMap" && property.value === this.currentMap)
         );
         const start = nextWorld.startingPoints[0];
@@ -236,7 +267,7 @@ class Game {
         if (!switcher) return;
 
         const destinationMap = switcher.properties.find((property) => property.name === "targetMap")?.value;
-        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world" && destinationMap !== "world_4" && destinationMap !== "world_5") {
+        if (destinationMap !== "world" && destinationMap !== "world_2" && destinationMap !== "port_world" && destinationMap !== "reflection_world" && destinationMap !== "world_4" && destinationMap !== "world_5" && destinationMap !== "birth_world") {
             console.error(`Unknown targetMap on map switcher: ${String(destinationMap)}`);
             return;
         }
