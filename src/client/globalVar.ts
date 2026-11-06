@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare const __RESOURCE_VERSION__: string;
+
 const TILE_SIZE: number = 32;
 const BASE_TILE_SIZE: number = 16;
 const WORLD_SCALE_FACTOR: number = 2;
@@ -16,7 +18,7 @@ const resizeCanvas = () => {
 };
 resizeCanvas();
 
-const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
+const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}?v=${__RESOURCE_VERSION__}`;
 
 export {
     TILE_SIZE,
