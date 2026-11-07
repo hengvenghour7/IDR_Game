@@ -16,12 +16,12 @@ class InteractionHandler {
     onTravel: ((map: MapName) => void) | null = null;
     private readonly isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
     private readonly destinations = [
-        { map: "birth_world", label: "1. Birth World" },
-        { map: "port_world", label: "2. Port" },
-        { map: "world", label: "3. World" },
-        { map: "world_4", label: "4. World 4" },
-        { map: "world_5", label: "5. World 5" },
-        { map: "reflection_world", label: "6. Reflection" },
+        { map: "birth_world", label: "1. Birth" },
+        { map: "port_world", label: "2. Emphasis" },
+        { map: "world", label: "3. Greed" },
+        { map: "world_4", label: "4. Darkness and Blood" },
+        { map: "world_5", label: "5 - 6. Destruction and Downfall" },
+        { map: "reflection_world", label: "7 - 8. Memories and Reflection" },
     ] as const;
 
     constructor (world: World, character: Player) {

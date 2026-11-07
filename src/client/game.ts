@@ -207,7 +207,7 @@ class Game {
         ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
         ctx.restore();
     }
-    changeworld = async (destinationMap: MapName, preferEntrySwitcher = false) => {
+    changeworld = async (destinationMap: MapName, travelToGlobe = false) => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
@@ -222,18 +222,14 @@ class Game {
             console.error(`Unable to load map ${destinationMap}:`, error);
             return;
         }
-        const rowEntry = preferEntrySwitcher
-            ? nextWorld.mapSwitchers.find((item) =>
-                Number(item.properties?.find((property) => property.name === "row")?.value) === 3
-            ) ?? nextWorld.mapSwitchers.find((item) =>
-                Number(item.properties?.find((property) => property.name === "row")?.value) === 2
-            )
-            : undefined;
-        const arrivalSwitcher = rowEntry ?? nextWorld.mapSwitchers.find((item) =>
+        const destinationGlobe = travelToGlobe ? nextWorld.globes.find((globe) => globe.visible) : undefined;
+        const arrivalSwitcher = destinationGlobe ? undefined : nextWorld.mapSwitchers.find((item) =>
             item.properties.some((property) => property.name === "targetMap" && property.value === this.currentMap)
         );
         const start = nextWorld.startingPoints[0];
-        const destination = arrivalSwitcher
+        const destination = destinationGlobe
+            ? { x: (destinationGlobe.x + destinationGlobe.width / 2) * 2, y: (destinationGlobe.y + destinationGlobe.height / 2) * 2 }
+            : arrivalSwitcher
             ? { x: (arrivalSwitcher.x + arrivalSwitcher.width / 2) * 2, y: (arrivalSwitcher.y + arrivalSwitcher.height / 2) * 2 }
             : start
                 ? { x: (start.x + start.width / 2) * 2, y: (start.y + start.height / 2) * 2 }
@@ -243,7 +239,7 @@ class Game {
         this.currentMap = destinationMap;
         this.world = nextWorld;
         this.interactionHandler.world = nextWorld;
-        this.arrivalSwitcherId = arrivalSwitcher.id;
+        this.arrivalSwitcherId = arrivalSwitcher?.id ?? null;
         // The player's camera offset is the inverse of their map position.
         this.player.worldPos = {
             x: destination.x - canvas.width / (2 * GLOBAL_SCALE),
