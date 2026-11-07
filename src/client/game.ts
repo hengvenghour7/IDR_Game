@@ -14,7 +14,7 @@ class Game {
     world: World;
     dog: Animal;
     interactionHandler: InteractionHandler;
-    currentMap: MapName = "world";
+    currentMap: MapName = "birth_world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
@@ -75,7 +75,7 @@ class Game {
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
         canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
-        this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
+        this.world = new World(assetUrl("images/birth_world.png"), "", assetUrl("map_properties/birth_world.tmj"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
