@@ -179,7 +179,7 @@
          "name":"collision",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":100,
          "x":0,
          "y":0
@@ -320,6 +320,91 @@
         }, 
         {
          "draworder":"topdown",
+         "id":6,
+         "name":"info_location",
+         "objects":[
+                {
+                 "height":16,
+                 "id":3,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"info",
+                         "type":"string",
+                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"targetMap",
+                         "type":"string",
+                         "value":"port_world"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":602,
+                 "y":729.333333333333
+                }, 
+                {
+                 "height":16,
+                 "id":4,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"info",
+                         "type":"string",
+                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"targetMap",
+                         "type":"string",
+                         "value":"port_world"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":332.916666666667,
+                 "y":332
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":4,
          "name":"globe",
          "objects":[
@@ -347,8 +432,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":935.333333333333,
-                 "y":664.666666666667
+                 "x":935.333,
+                 "y":664.667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -356,8 +441,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":3,
+ "nextlayerid":7,
+ "nextobjectid":5,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

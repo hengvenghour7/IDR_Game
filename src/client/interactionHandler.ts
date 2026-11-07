@@ -224,17 +224,20 @@ class InteractionHandler {
     }
 
     private drawInfoText = (ctx: CanvasRenderingContext2D, text: string) => {
-        const padding = 20;
-        const boxWidth = Math.min(canvas.width - 32, 640);
+        const paddingX = 20;
+        const paddingY = 16;
+        const maxBoxWidth = Math.min(canvas.width - 32, 640);
         const lineHeight = 28;
         ctx.save();
         ctx.font = "20px Arial";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
         const words = text.split(/\s+/);
         const lines: string[] = [];
         let line = "";
         words.forEach((word) => {
             const candidate = line ? `${line} ${word}` : word;
-            if (line && ctx.measureText(candidate).width > boxWidth - padding * 2) {
+            if (line && ctx.measureText(candidate).width > maxBoxWidth - paddingX * 2) {
                 lines.push(line);
                 line = word;
             } else {
@@ -243,7 +246,9 @@ class InteractionHandler {
         });
         if (line) lines.push(line);
 
-        const boxHeight = lines.length * lineHeight + padding * 2;
+        const textWidth = Math.max(...lines.map((textLine) => ctx.measureText(textLine).width));
+        const boxWidth = Math.min(maxBoxWidth, textWidth + paddingX * 2);
+        const boxHeight = lines.length * lineHeight + paddingY * 2;
         const x = (canvas.width - boxWidth) / 2;
         const y = canvas.height - boxHeight - 32;
         ctx.fillStyle = "rgba(0, 0, 0, 0.82)";
@@ -253,7 +258,7 @@ class InteractionHandler {
         ctx.strokeRect(x, y, boxWidth, boxHeight);
         ctx.fillStyle = "#fff4df";
         lines.forEach((textLine, index) => {
-            ctx.fillText(textLine, x + padding, y + padding + (index + 1) * lineHeight - 5);
+            ctx.fillText(textLine, x + paddingX, y + paddingY + index * lineHeight);
         });
         ctx.restore();
     }
