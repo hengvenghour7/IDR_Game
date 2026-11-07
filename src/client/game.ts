@@ -1,7 +1,7 @@
 import { Character, Player, Animal } from "./character"
 import { inputKeys, MapName, Vector2 } from "./utilities";
 import { World } from "./world";
-import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas } from "./globalVar";
+import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas, SCALE_OPTIONS, setGlobalScale } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
 import { checkRectangleCollision } from "./helpers";
 import { MobileUI } from "./UI";
@@ -74,6 +74,7 @@ class Game {
         this.muteIconImage.src = assetUrl("images/mute.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
+        canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -137,10 +138,35 @@ class Game {
         }
     }
     private getSoundButtonBounds = () => ({
-        x: canvas.width - 56,
-        y: 16,
+        x: canvas.width - 52,
+        y: 66,
         size: 40
     });
+    private getScaleButtonBounds = () => ({
+        x: canvas.width - 200,
+        y: 16,
+        width: 56,
+        height: 40,
+        gap: 8
+    });
+    private handleScaleButtonPointer = (event: PointerEvent) => {
+        if (!this.gameStarted) return;
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const buttons = this.getScaleButtonBounds();
+        if (y < buttons.y || y > buttons.y + buttons.height) return;
+        const buttonIndex = Math.floor((x - buttons.x) / (buttons.width + buttons.gap));
+        if (buttonIndex < 0 || buttonIndex >= SCALE_OPTIONS.length
+            || x > buttons.x + buttonIndex * (buttons.width + buttons.gap) + buttons.width) return;
+        event.preventDefault();
+
+        const playerMapX = this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
+        const playerMapY = this.player.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
+        setGlobalScale(SCALE_OPTIONS[buttonIndex]);
+        this.player.worldPos.x = playerMapX - canvas.width / (2 * GLOBAL_SCALE);
+        this.player.worldPos.y = playerMapY - canvas.height / (2 * GLOBAL_SCALE);
+    }
     private drawSoundButton = (context: CanvasRenderingContext2D) => {
         const icon = this.isMusicMuted ? this.muteIconImage : this.soundIconImage;
         if (!icon.complete || icon.naturalWidth === 0) return;
@@ -155,6 +181,23 @@ class Game {
             context.fillText("Tap for sound", button.x - 8, button.y + button.size / 2);
             context.restore();
         }
+        const scaleButtons = this.getScaleButtonBounds();
+        SCALE_OPTIONS.forEach((scale, index) => {
+            const x = scaleButtons.x + index * (scaleButtons.width + scaleButtons.gap);
+            const isSelected = scale === GLOBAL_SCALE;
+            context.fillStyle = "rgba(0, 0, 0, 0.7)";
+            context.beginPath();
+            context.roundRect(x, scaleButtons.y, scaleButtons.width, scaleButtons.height, 8);
+            context.fill();
+            context.strokeStyle = isSelected ? "#4ade80" : "#ffbd75";
+            context.lineWidth = isSelected ? 3 : 2;
+            context.stroke();
+            context.fillStyle = "#fff4df";
+            context.font = "bold 14px Arial";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(`${scale}×`, x + scaleButtons.width / 2, scaleButtons.y + scaleButtons.height / 2);
+        });
     }
     private startGame = () => {
         if (this.gameStarted) return;
