@@ -13,15 +13,18 @@ class InteractionHandler {
     viewImage: HTMLImageElement;
     isGlobeMenuOpen = false;
     selectedDestination = 0;
+    private isInfoOpen = false;
+    private openedInfoText: string | null = null;
+    private wasIPressed = false;
     onTravel: ((map: MapName) => void) | null = null;
     private readonly isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
     private readonly destinations = [
-        { map: "birth_world", label: "1. Birth World" },
-        { map: "port_world", label: "2. Port" },
-        { map: "world", label: "3. World" },
-        { map: "world_4", label: "4. World 4" },
-        { map: "world_5", label: "5. World 5" },
-        { map: "reflection_world", label: "6. Reflection" },
+        { map: "birth_world", label: "1. Birth" },
+        { map: "port_world", label: "2. Emphasis" },
+        { map: "world", label: "3. Greed" },
+        { map: "world_4", label: "4. Darkness and Blood" },
+        { map: "world_5", label: "5 - 6. Destruction and Downfall" },
+        { map: "reflection_world", label: "7 - 8. Memories and Reflection" },
     ] as const;
 
     constructor (world: World, character: Player) {
@@ -35,6 +38,10 @@ class InteractionHandler {
         canvas.addEventListener("pointerdown", this.handleMenuPointer);
     }
     tick = (ctx: CanvasRenderingContext2D) => {
+        const iIsPressed = inputKeys.has("i");
+        const iPressed = iIsPressed && !this.wasIPressed;
+        this.wasIPressed = iIsPressed;
+        const iReleased = inputKeys.delete("iu");
         this.isViewAvailable = false;
         let isInfoAvailable = false;
         let nearbyInfoText: string | null = null;
@@ -58,9 +65,18 @@ class InteractionHandler {
             if (checkRectangleCollision(locationRect, this.character.getCollisionBox())) {
                 isInfoAvailable = true;
                 const info = location.properties?.find((item) => item.name === "info")?.value;
-                if (inputKeys.has("i") && typeof info === "string") nearbyInfoText = info;
+                if (typeof info === "string") nearbyInfoText = info;
             }
         });
+        if (iPressed) {
+            if (this.isInfoOpen) {
+                this.isInfoOpen = false;
+                this.openedInfoText = null;
+            } else if (nearbyInfoText !== null) {
+                this.isInfoOpen = true;
+                this.openedInfoText = nearbyInfoText;
+            }
+        }
         this.world.viewPoints.forEach((p) => {
             const pRect: Rectangle = {
                 // Tiled object coordinates are in 16px map units; world space uses 32px units.
@@ -87,11 +103,11 @@ class InteractionHandler {
         if (isGlobeAvailable || this.isViewAvailable || isInfoAvailable) {
             this.drawInteractionTooltip(
                 ctx,
-                isGlobeAvailable ? "Press I to travel" : isInfoAvailable ? "Hold I to read" : "Hold I to open view"
+                isGlobeAvailable ? "Press I to travel" : isInfoAvailable ? "Press I to read" : "Hold I to open view"
             );
         }
-        if (nearbyInfoText !== null) {
-            this.drawInfoText(ctx, nearbyInfoText);
+        if (this.isInfoOpen && this.openedInfoText !== null) {
+            this.drawInfoText(ctx, this.openedInfoText);
         }
         if (this.isViewOpen) {
             if (this.viewImage.complete && this.viewImage.naturalWidth > 0) {
@@ -114,7 +130,7 @@ class InteractionHandler {
             }
 
         }
-        if (inputKeys.has("iu") && this.isViewOpen) {
+        if (iReleased && this.isViewOpen) {
             this.isViewOpen = false;
         }
     }
@@ -224,17 +240,20 @@ class InteractionHandler {
     }
 
     private drawInfoText = (ctx: CanvasRenderingContext2D, text: string) => {
-        const padding = 20;
-        const boxWidth = Math.min(canvas.width - 32, 640);
+        const paddingX = 20;
+        const paddingY = 16;
+        const maxBoxWidth = Math.min(canvas.width - 32, 640);
         const lineHeight = 28;
         ctx.save();
         ctx.font = "20px Arial";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
         const words = text.split(/\s+/);
         const lines: string[] = [];
         let line = "";
         words.forEach((word) => {
             const candidate = line ? `${line} ${word}` : word;
-            if (line && ctx.measureText(candidate).width > boxWidth - padding * 2) {
+            if (line && ctx.measureText(candidate).width > maxBoxWidth - paddingX * 2) {
                 lines.push(line);
                 line = word;
             } else {
@@ -243,7 +262,9 @@ class InteractionHandler {
         });
         if (line) lines.push(line);
 
-        const boxHeight = lines.length * lineHeight + padding * 2;
+        const textWidth = Math.max(...lines.map((textLine) => ctx.measureText(textLine).width));
+        const boxWidth = Math.min(maxBoxWidth, textWidth + paddingX * 2);
+        const boxHeight = lines.length * lineHeight + paddingY * 2;
         const x = (canvas.width - boxWidth) / 2;
         const y = canvas.height - boxHeight - 32;
         ctx.fillStyle = "rgba(0, 0, 0, 0.82)";
@@ -253,7 +274,7 @@ class InteractionHandler {
         ctx.strokeRect(x, y, boxWidth, boxHeight);
         ctx.fillStyle = "#fff4df";
         lines.forEach((textLine, index) => {
-            ctx.fillText(textLine, x + padding, y + padding + (index + 1) * lineHeight - 5);
+            ctx.fillText(textLine, x + paddingX, y + paddingY + index * lineHeight);
         });
         ctx.restore();
     }

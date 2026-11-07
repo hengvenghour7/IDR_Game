@@ -1,7 +1,7 @@
 import { Character, Player, Animal } from "./character"
 import { inputKeys, MapName, Vector2 } from "./utilities";
 import { World } from "./world";
-import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas } from "./globalVar";
+import { assetUrl, canvas, GLOBAL_SCALE, resizeCanvas, SCALE_OPTIONS, setGlobalScale } from "./globalVar";
 import { InteractionHandler } from "./interactionHandler";
 import { checkRectangleCollision } from "./helpers";
 import { MobileUI } from "./UI";
@@ -74,6 +74,7 @@ class Game {
         this.muteIconImage.src = assetUrl("images/mute.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
+        canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
         this.world = new World(assetUrl("images/world.png"), assetUrl("images/world_front.png"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -137,10 +138,35 @@ class Game {
         }
     }
     private getSoundButtonBounds = () => ({
-        x: canvas.width - 56,
-        y: 16,
+        x: canvas.width - 52,
+        y: 66,
         size: 40
     });
+    private getScaleButtonBounds = () => ({
+        x: canvas.width - 200,
+        y: 16,
+        width: 56,
+        height: 40,
+        gap: 8
+    });
+    private handleScaleButtonPointer = (event: PointerEvent) => {
+        if (!this.gameStarted) return;
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const buttons = this.getScaleButtonBounds();
+        if (y < buttons.y || y > buttons.y + buttons.height) return;
+        const buttonIndex = Math.floor((x - buttons.x) / (buttons.width + buttons.gap));
+        if (buttonIndex < 0 || buttonIndex >= SCALE_OPTIONS.length
+            || x > buttons.x + buttonIndex * (buttons.width + buttons.gap) + buttons.width) return;
+        event.preventDefault();
+
+        const playerMapX = this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
+        const playerMapY = this.player.worldPos.y + canvas.height / (2 * GLOBAL_SCALE);
+        setGlobalScale(SCALE_OPTIONS[buttonIndex]);
+        this.player.worldPos.x = playerMapX - canvas.width / (2 * GLOBAL_SCALE);
+        this.player.worldPos.y = playerMapY - canvas.height / (2 * GLOBAL_SCALE);
+    }
     private drawSoundButton = (context: CanvasRenderingContext2D) => {
         const icon = this.isMusicMuted ? this.muteIconImage : this.soundIconImage;
         if (!icon.complete || icon.naturalWidth === 0) return;
@@ -155,6 +181,23 @@ class Game {
             context.fillText("Tap for sound", button.x - 8, button.y + button.size / 2);
             context.restore();
         }
+        const scaleButtons = this.getScaleButtonBounds();
+        SCALE_OPTIONS.forEach((scale, index) => {
+            const x = scaleButtons.x + index * (scaleButtons.width + scaleButtons.gap);
+            const isSelected = scale === GLOBAL_SCALE;
+            context.fillStyle = "rgba(0, 0, 0, 0.7)";
+            context.beginPath();
+            context.roundRect(x, scaleButtons.y, scaleButtons.width, scaleButtons.height, 8);
+            context.fill();
+            context.strokeStyle = isSelected ? "#4ade80" : "#ffbd75";
+            context.lineWidth = isSelected ? 3 : 2;
+            context.stroke();
+            context.fillStyle = "#fff4df";
+            context.font = "bold 14px Arial";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(`${scale}×`, x + scaleButtons.width / 2, scaleButtons.y + scaleButtons.height / 2);
+        });
     }
     private startGame = () => {
         if (this.gameStarted) return;
@@ -207,7 +250,7 @@ class Game {
         ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
         ctx.restore();
     }
-    changeworld = async (destinationMap: MapName, preferEntrySwitcher = false) => {
+    changeworld = async (destinationMap: MapName, travelToGlobe = false) => {
         if (destinationMap === this.currentMap || this.isChangingWorld) return;
         this.isChangingWorld = true;
         const nextWorld = new World(
@@ -222,18 +265,14 @@ class Game {
             console.error(`Unable to load map ${destinationMap}:`, error);
             return;
         }
-        const rowEntry = preferEntrySwitcher
-            ? nextWorld.mapSwitchers.find((item) =>
-                Number(item.properties?.find((property) => property.name === "row")?.value) === 3
-            ) ?? nextWorld.mapSwitchers.find((item) =>
-                Number(item.properties?.find((property) => property.name === "row")?.value) === 2
-            )
-            : undefined;
-        const arrivalSwitcher = rowEntry ?? nextWorld.mapSwitchers.find((item) =>
+        const destinationGlobe = travelToGlobe ? nextWorld.globes.find((globe) => globe.visible) : undefined;
+        const arrivalSwitcher = destinationGlobe ? undefined : nextWorld.mapSwitchers.find((item) =>
             item.properties.some((property) => property.name === "targetMap" && property.value === this.currentMap)
         );
         const start = nextWorld.startingPoints[0];
-        const destination = arrivalSwitcher
+        const destination = destinationGlobe
+            ? { x: (destinationGlobe.x + destinationGlobe.width / 2) * 2, y: (destinationGlobe.y + destinationGlobe.height / 2) * 2 }
+            : arrivalSwitcher
             ? { x: (arrivalSwitcher.x + arrivalSwitcher.width / 2) * 2, y: (arrivalSwitcher.y + arrivalSwitcher.height / 2) * 2 }
             : start
                 ? { x: (start.x + start.width / 2) * 2, y: (start.y + start.height / 2) * 2 }
@@ -243,7 +282,7 @@ class Game {
         this.currentMap = destinationMap;
         this.world = nextWorld;
         this.interactionHandler.world = nextWorld;
-        this.arrivalSwitcherId = arrivalSwitcher.id;
+        this.arrivalSwitcherId = arrivalSwitcher?.id ?? null;
         // The player's camera offset is the inverse of their map position.
         this.player.worldPos = {
             x: destination.x - canvas.width / (2 * GLOBAL_SCALE),
@@ -326,7 +365,7 @@ class Game {
                 ? Math.max(firstFrame + 1, Math.min(3, Math.floor(requestedLastFrame)))
                 : 3;
             const frameCount = lastFrame - firstFrame;
-            const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+            const frame = firstFrame + Math.floor(this.markerAnimationTime * 7) % frameCount;
             ctx.drawImage(
                 this.globeIconImage,
                 frame * 16, 0, 16, 17,
@@ -355,7 +394,7 @@ class Game {
         const colEnd = Number.isFinite(requestedColEnd) ? Math.floor(requestedColEnd) : 3;
         const frameCount = Math.max(1, Math.min(3, colEnd) - Math.min(2, colStart));
         const firstFrame = Math.min(2, colStart);
-        const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+        const frame = firstFrame + Math.floor(this.markerAnimationTime * 7) % frameCount;
         const frameWidth = 16;
         const frameHeight = 17;
         const x = (marker.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
