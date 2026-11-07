@@ -13,6 +13,9 @@ class InteractionHandler {
     viewImage: HTMLImageElement;
     isGlobeMenuOpen = false;
     selectedDestination = 0;
+    private isInfoOpen = false;
+    private openedInfoText: string | null = null;
+    private wasIPressed = false;
     onTravel: ((map: MapName) => void) | null = null;
     private readonly isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
     private readonly destinations = [
@@ -35,6 +38,10 @@ class InteractionHandler {
         canvas.addEventListener("pointerdown", this.handleMenuPointer);
     }
     tick = (ctx: CanvasRenderingContext2D) => {
+        const iIsPressed = inputKeys.has("i");
+        const iPressed = iIsPressed && !this.wasIPressed;
+        this.wasIPressed = iIsPressed;
+        const iReleased = inputKeys.delete("iu");
         this.isViewAvailable = false;
         let isInfoAvailable = false;
         let nearbyInfoText: string | null = null;
@@ -58,9 +65,18 @@ class InteractionHandler {
             if (checkRectangleCollision(locationRect, this.character.getCollisionBox())) {
                 isInfoAvailable = true;
                 const info = location.properties?.find((item) => item.name === "info")?.value;
-                if (inputKeys.has("i") && typeof info === "string") nearbyInfoText = info;
+                if (typeof info === "string") nearbyInfoText = info;
             }
         });
+        if (iPressed) {
+            if (this.isInfoOpen) {
+                this.isInfoOpen = false;
+                this.openedInfoText = null;
+            } else if (nearbyInfoText !== null) {
+                this.isInfoOpen = true;
+                this.openedInfoText = nearbyInfoText;
+            }
+        }
         this.world.viewPoints.forEach((p) => {
             const pRect: Rectangle = {
                 // Tiled object coordinates are in 16px map units; world space uses 32px units.
@@ -87,11 +103,11 @@ class InteractionHandler {
         if (isGlobeAvailable || this.isViewAvailable || isInfoAvailable) {
             this.drawInteractionTooltip(
                 ctx,
-                isGlobeAvailable ? "Press I to travel" : isInfoAvailable ? "Hold I to read" : "Hold I to open view"
+                isGlobeAvailable ? "Press I to travel" : isInfoAvailable ? "Press I to read" : "Hold I to open view"
             );
         }
-        if (nearbyInfoText !== null) {
-            this.drawInfoText(ctx, nearbyInfoText);
+        if (this.isInfoOpen && this.openedInfoText !== null) {
+            this.drawInfoText(ctx, this.openedInfoText);
         }
         if (this.isViewOpen) {
             if (this.viewImage.complete && this.viewImage.naturalWidth > 0) {
@@ -114,7 +130,7 @@ class InteractionHandler {
             }
 
         }
-        if (inputKeys.has("iu") && this.isViewOpen) {
+        if (iReleased && this.isViewOpen) {
             this.isViewOpen = false;
         }
     }

@@ -365,7 +365,7 @@ class Game {
                 ? Math.max(firstFrame + 1, Math.min(3, Math.floor(requestedLastFrame)))
                 : 3;
             const frameCount = lastFrame - firstFrame;
-            const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+            const frame = firstFrame + Math.floor(this.markerAnimationTime * 7) % frameCount;
             ctx.drawImage(
                 this.globeIconImage,
                 frame * 16, 0, 16, 17,
@@ -394,7 +394,7 @@ class Game {
         const colEnd = Number.isFinite(requestedColEnd) ? Math.floor(requestedColEnd) : 3;
         const frameCount = Math.max(1, Math.min(3, colEnd) - Math.min(2, colStart));
         const firstFrame = Math.min(2, colStart);
-        const frame = firstFrame + Math.floor(this.markerAnimationTime * 8) % frameCount;
+        const frame = firstFrame + Math.floor(this.markerAnimationTime * 7) % frameCount;
         const frameWidth = 16;
         const frameHeight = 17;
         const x = (marker.x * 2 + cameraOffset.x) * GLOBAL_SCALE;
