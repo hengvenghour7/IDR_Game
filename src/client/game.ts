@@ -154,7 +154,7 @@ class Game {
         size: 40
     });
     private getScaleButtonBounds = () => ({
-        x: canvas.width - 200,
+        x: this.isTouchDevice ? canvas.width - 72 : canvas.width - 200,
         y: 16,
         width: 56,
         height: 40,
@@ -167,9 +167,16 @@ class Game {
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
         const buttons = this.getScaleButtonBounds();
         if (y < buttons.y || y > buttons.y + buttons.height) return;
-        const buttonIndex = Math.floor((x - buttons.x) / (buttons.width + buttons.gap));
-        if (buttonIndex < 0 || buttonIndex >= SCALE_OPTIONS.length
-            || x > buttons.x + buttonIndex * (buttons.width + buttons.gap) + buttons.width) return;
+        let buttonIndex: number;
+        if (this.isTouchDevice) {
+            if (x < buttons.x || x > buttons.x + buttons.width) return;
+            const currentIndex = SCALE_OPTIONS.indexOf(GLOBAL_SCALE as typeof SCALE_OPTIONS[number]);
+            buttonIndex = (currentIndex + 1) % SCALE_OPTIONS.length;
+        } else {
+            buttonIndex = Math.floor((x - buttons.x) / (buttons.width + buttons.gap));
+            if (buttonIndex < 0 || buttonIndex >= SCALE_OPTIONS.length
+                || x > buttons.x + buttonIndex * (buttons.width + buttons.gap) + buttons.width) return;
+        }
         event.preventDefault();
 
         const playerMapX = this.player.worldPos.x + canvas.width / (2 * GLOBAL_SCALE);
@@ -193,7 +200,10 @@ class Game {
             context.restore();
         }
         const scaleButtons = this.getScaleButtonBounds();
-        SCALE_OPTIONS.forEach((scale, index) => {
+        const optionsToDraw = this.isTouchDevice
+            ? [GLOBAL_SCALE]
+            : SCALE_OPTIONS;
+        optionsToDraw.forEach((scale, index) => {
             const x = scaleButtons.x + index * (scaleButtons.width + scaleButtons.gap);
             const isSelected = scale === GLOBAL_SCALE;
             context.fillStyle = "rgba(0, 0, 0, 0.7)";
