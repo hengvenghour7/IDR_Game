@@ -36,6 +36,7 @@ class Game {
     private isMusicMuted = false;
     private musicNeedsTap = false;
     private gameStarted = false;
+    private isTipOpen = false;
     
     constructor() {
         this.isMobileScreen = false;
@@ -83,6 +84,7 @@ class Game {
         canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
         canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
         canvas.addEventListener("pointerdown", this.handleMemoriesPanelPointer);
+        canvas.addEventListener("pointerdown", this.handleTipButtonPointer);
         this.world = new World(assetUrl("images/reflection_world.png"), "", assetUrl("map_properties/reflection_world.tmj"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -160,6 +162,17 @@ class Game {
         height: 40,
         gap: 8
     });
+    private getTipButtonBounds = () => ({ x: canvas.width - 72, y: 116, width: 56, height: 38 });
+    private handleTipButtonPointer = (event: PointerEvent) => {
+        if (!this.gameStarted) return;
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const button = this.getTipButtonBounds();
+        if (x < button.x || x > button.x + button.width || y < button.y || y > button.y + button.height) return;
+        this.isTipOpen = !this.isTipOpen;
+        event.preventDefault();
+    }
     private handleScaleButtonPointer = (event: PointerEvent) => {
         if (!this.gameStarted) return;
         const bounds = canvas.getBoundingClientRect();
@@ -219,6 +232,33 @@ class Game {
             context.textBaseline = "middle";
             context.fillText(`${scale}×`, x + scaleButtons.width / 2, scaleButtons.y + scaleButtons.height / 2);
         });
+        const tipButton = this.getTipButtonBounds();
+        context.fillStyle = "rgba(0, 0, 0, 0.75)";
+        context.beginPath();
+        context.roundRect(tipButton.x, tipButton.y, tipButton.width, tipButton.height, 8);
+        context.fill();
+        context.strokeStyle = "#ffbd75";
+        context.lineWidth = 2;
+        context.stroke();
+        context.fillStyle = "#fff4df";
+        context.font = "bold 14px Arial";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText("TIP", tipButton.x + tipButton.width / 2, tipButton.y + tipButton.height / 2);
+        if (this.isTipOpen) {
+            const panelWidth = Math.min(320, canvas.width - 32);
+            const panelX = canvas.width - panelWidth - 16;
+            const panelY = tipButton.y + tipButton.height + 8;
+            context.fillStyle = "rgba(20, 20, 24, 0.9)";
+            context.fillRect(panelX, panelY, panelWidth, 68);
+            context.strokeStyle = "rgba(255, 255, 255, 0.75)";
+            context.strokeRect(panelX, panelY, panelWidth, 68);
+            context.fillStyle = "white";
+            context.font = "14px Arial";
+            context.textAlign = "left";
+            context.fillText("Collect memories across the map to", panelX + 10, panelY + 27, panelWidth - 20);
+            context.fillText("update reflection pavillion design.", panelX + 10, panelY + 49, panelWidth - 20);
+        }
     }
     private startGame = () => {
         if (this.gameStarted) return;
@@ -259,6 +299,9 @@ class Game {
         ctx.fillStyle = "#fff4df";
         ctx.font = "18px Arial";
         ctx.fillText("WASD to move  • Hold I to interact", canvas.width / 2, button.y - 24);
+        ctx.font = "16px Arial";
+        ctx.fillText("Collect memories across the map to update", canvas.width / 2, canvas.height * 0.53);
+        ctx.fillText("reflection pavillion design.", canvas.width / 2, canvas.height * 0.53 + 24);
         ctx.fillStyle = "BLACK";
         ctx.beginPath();
         ctx.roundRect(button.x, button.y, button.width, button.height, 12);
@@ -489,7 +532,7 @@ class Game {
         ctx.textAlign = "left";
         ctx.font = "12px Arial";
         ctx.fillStyle = "#dedede";
-        ctx.fillText("Collected memories below can be to toggle it on or off.", panel.x + 10, panel.y + panel.hintHeight / 2, panel.width - 20);
+        ctx.fillText("Collected memories can be toggle on or off.", panel.x + 10, panel.y + panel.hintHeight / 2, panel.width - 20);
         const headerY = panel.y + panel.hintHeight;
         ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
         ctx.fillRect(panel.x, headerY, panel.width, panel.headerHeight);
