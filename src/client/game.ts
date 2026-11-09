@@ -23,8 +23,11 @@ class Game {
     private readonly startScreenImage = new Image();
     private readonly helperIconImage = new Image();
     private readonly globeIconImage = new Image();
+    private readonly memoryIconImage = new Image();
     private readonly soundIconImage = new Image();
     private readonly muteIconImage = new Image();
+    private readonly memoryImages = new Map<string, HTMLImageElement>();
+    private readonly collectedMemories: string[] = [];
     private markerAnimationTime = 0;
     private readonly backgroundMusic = new Audio(assetUrl("sounds/3 - Revelation.ogg"));
     private isMusicMuted = false;
@@ -70,6 +73,7 @@ class Game {
         this.startScreenImage.src = assetUrl("images/scenery/view_1.png");
         this.helperIconImage.src = assetUrl("images/helper_icon.png");
         this.globeIconImage.src = assetUrl("images/globe_icon.png");
+        this.memoryIconImage.src = assetUrl("images/memories_icon.png");
         this.soundIconImage.src = assetUrl("images/sound.png");
         this.muteIconImage.src = assetUrl("images/mute.png");
         canvas.addEventListener("pointerdown", this.handleStartPointer);
@@ -96,11 +100,13 @@ class Game {
         this.dog.approachTarget(this.player, deltaTime);
         
         this.world.draw(ctx, this.player.getWorldPos());
+        this.drawCollectedMemoryStack();
         this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), deltaTime);
         this.drawViewPoints();
         this.drawMapSwitchers();
         this.drawInfoLocations();
         this.drawGlobes();
+        this.drawMemories();
         this.player.draw(ctx, deltaTime);
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
@@ -373,6 +379,65 @@ class Game {
                 (globe.y * 2 + cameraOffset.y) * GLOBAL_SCALE,
                 globe.width * 2 * GLOBAL_SCALE,
                 globe.height * 2 * GLOBAL_SCALE
+            );
+        });
+    }
+
+    private drawMemories = () => {
+        if (!this.memoryIconImage.complete || this.memoryIconImage.naturalWidth === 0) return;
+        const cameraOffset = this.player.getWorldPos();
+        this.world.memories.forEach((memory) => {
+            if (!memory.visible) return;
+            const key = memory.properties?.find((property) => property.name === "key")?.value;
+            if (typeof key !== "string" || this.collectedMemories.includes(key)) return;
+            const memoryBox = {
+                x: memory.x * 2,
+                y: memory.y * 2,
+                width: memory.width * 2,
+                height: memory.height * 2
+            };
+            if (checkRectangleCollision(memoryBox, this.player.getCollisionBox())) {
+                this.collectedMemories.push(key);
+                return;
+            }
+            const property = (name: string) => memory.properties?.find((item) => item.name === name)?.value;
+            const firstFrame = Math.max(0, Math.min(2, Math.floor(Number(property("col_start")) || 0)));
+            const requestedLastFrame = Number(property("col_end"));
+            const lastFrame = Number.isFinite(requestedLastFrame)
+                ? Math.max(firstFrame + 1, Math.min(3, Math.floor(requestedLastFrame)))
+                : 3;
+            const frameCount = lastFrame - firstFrame;
+            const frame = firstFrame + Math.floor(this.markerAnimationTime * 7) % frameCount;
+            ctx.drawImage(
+                this.memoryIconImage,
+                frame * 16, 0, 16, 17,
+                (memory.x * 2 + cameraOffset.x) * GLOBAL_SCALE,
+                (memory.y * 2 + cameraOffset.y) * GLOBAL_SCALE,
+                memory.width * 2 * GLOBAL_SCALE,
+                memory.height * 2 * GLOBAL_SCALE
+            );
+        });
+    }
+
+    private drawCollectedMemoryStack = () => {
+        if (this.currentMap !== "reflection_world" || this.collectedMemories.length === 0) return;
+
+        this.collectedMemories.forEach((key, index) => {
+            let image = this.memoryImages.get(key);
+            if (!image) {
+                image = new Image();
+                image.src = assetUrl(`images/memories/${key}.png`);
+                this.memoryImages.set(key, image);
+            }
+            if (!image.complete || image.naturalWidth === 0) return;
+            // Memory images are full-map transparent layers, so align each at the
+            // reflection map origin and use the same scale as the world texture.
+            ctx.drawImage(
+                image,
+                this.player.getWorldPos().x * GLOBAL_SCALE,
+                this.player.getWorldPos().y * GLOBAL_SCALE,
+                1600 * 2 * GLOBAL_SCALE,
+                1280 * 2 * GLOBAL_SCALE
             );
         });
     }

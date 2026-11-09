@@ -347,7 +347,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":1186.667,
+                 "x":1186.67,
                  "y":445.667
                 }, 
                 {
@@ -381,6 +381,44 @@
                  "width":16,
                  "x":704.5,
                  "y":355
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":8,
+         "name":"memories",
+         "objects":[
+                {
+                 "height":16,
+                 "id":8,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"key",
+                         "type":"string",
+                         "value":"2.emphasis"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1023.5,
+                 "y":431
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -479,8 +517,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":8,
- "nextobjectid":6,
+ "nextlayerid":9,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

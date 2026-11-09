@@ -1,4 +1,4 @@
-import { AnimatedSpriteType, GlobeType, InfoLocationType, Layer, MapSwitcherType, Vector2, ViewPointType } from "./utilities";
+import { AnimatedSpriteType, GlobeType, InfoLocationType, Layer, MapSwitcherType, MemoryType, Vector2, ViewPointType } from "./utilities";
 import { arrayToArray2D, getElementFromJsonByNameField, readJsonFile } from "./helpers";
 import { assetUrl, GLOBAL_SCALE } from "./globalVar";
 
@@ -12,6 +12,7 @@ class World {
     mapSwitchers: MapSwitcherType[] = [];
     infoLocations: InfoLocationType[] = [];
     globes: GlobeType[] = [];
+    memories: MemoryType[] = [];
     animatedSprites: Array<{ object: AnimatedSpriteType; image: HTMLImageElement }> = [];
     private animationTime = 0;
     private mapDataPromise: Promise<void>;
@@ -36,6 +37,7 @@ class World {
         const mapSwitchersData = getElementFromJsonByNameField(j, "map_switcher");
         const infoLocationsData = getElementFromJsonByNameField(j, "info_location");
         const globesData = getElementFromJsonByNameField(j, "globe");
+        const memoriesData = getElementFromJsonByNameField(j, "memories");
         const animatedSpritesData = j.layers.find((layer: Layer) =>
             layer.name === "animated_sprite" || layer.name === "animate_sprite"
         );
@@ -49,6 +51,7 @@ class World {
         this.mapSwitchers = mapSwitchersData?.objects ?? [];
         this.infoLocations = infoLocationsData?.objects ?? [];
         this.globes = globesData?.objects ?? [];
+        this.memories = memoriesData?.objects ?? [];
         this.animatedSprites = (animatedSpritesData?.objects ?? []).map((object: AnimatedSpriteType) => {
             const image = new Image();
             const imgSrc = object.properties?.find((property) => property.name === "imgSrc")?.value;
