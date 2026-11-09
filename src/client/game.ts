@@ -10,11 +10,12 @@ let previousTime = 0;
 let deltaTime = 0;
 
 class Game {
+    private readonly totalMemoryCount = 7;
     player: Player;
     world: World;
     dog: Animal;
     interactionHandler: InteractionHandler;
-    currentMap: MapName = "birth_world";
+    currentMap: MapName = "reflection_world";
     private isChangingWorld = false;
     private arrivalSwitcherId: number | null = null;
     mobileUI: MobileUI;
@@ -28,6 +29,8 @@ class Game {
     private readonly muteIconImage = new Image();
     private readonly memoryImages = new Map<string, HTMLImageElement>();
     private readonly collectedMemories: string[] = [];
+    private readonly memoryVisibility = new Map<string, boolean>();
+    private isMemoriesListOpen = true;
     private markerAnimationTime = 0;
     private readonly backgroundMusic = new Audio(assetUrl("sounds/3 - Revelation.ogg"));
     private isMusicMuted = false;
@@ -79,7 +82,8 @@ class Game {
         canvas.addEventListener("pointerdown", this.handleStartPointer);
         canvas.addEventListener("pointerdown", this.handleSoundButtonPointer);
         canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
-        this.world = new World(assetUrl("images/birth_world.png"), "", assetUrl("map_properties/birth_world.tmj"));
+        canvas.addEventListener("pointerdown", this.handleMemoriesPanelPointer);
+        this.world = new World(assetUrl("images/reflection_world.png"), "", assetUrl("map_properties/reflection_world.tmj"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
         this.interactionHandler = new InteractionHandler(this.world, this.player);
@@ -111,6 +115,7 @@ class Game {
         this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
         this.interactionHandler.tick(ctx);
+        this.drawMemoriesPanel();
         this.drawSoundButton(ctx);
         if (this.isTouchDevice) {
             this.mobileUI.draw(ctx);
@@ -398,6 +403,7 @@ class Game {
             };
             if (checkRectangleCollision(memoryBox, this.player.getCollisionBox())) {
                 this.collectedMemories.push(key);
+                this.memoryVisibility.set(key, true);
                 return;
             }
             const property = (name: string) => memory.properties?.find((item) => item.name === name)?.value;
@@ -422,7 +428,8 @@ class Game {
     private drawCollectedMemoryStack = () => {
         if (this.currentMap !== "reflection_world" || this.collectedMemories.length === 0) return;
 
-        this.collectedMemories.forEach((key, index) => {
+        this.getSortedCollectedMemories().forEach((key, index) => {
+            if (this.memoryVisibility.get(key) === false) return;
             let image = this.memoryImages.get(key);
             if (!image) {
                 image = new Image();
@@ -440,6 +447,87 @@ class Game {
                 1280 * 2 * GLOBAL_SCALE
             );
         });
+    }
+
+    private getMemoriesPanelLayout = () => {
+        const x = 16;
+        const y = 16;
+        const width = Math.min(250, canvas.width - 32);
+        const hintHeight = 30;
+        const headerHeight = 34;
+        const rowHeight = 30;
+        const listHeight = this.isMemoriesListOpen ? this.collectedMemories.length * rowHeight : 0;
+        return { x, y, width, height: hintHeight + headerHeight + listHeight, hintHeight, headerHeight, rowHeight };
+    }
+
+    private getSortedCollectedMemories = () => [...this.collectedMemories].sort((left, right) => {
+        const leftOrder = Number(left.match(/^\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER);
+        const rightOrder = Number(right.match(/^\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER);
+        return leftOrder - rightOrder || left.localeCompare(right);
+    });
+
+    private drawMemoriesPanel = () => {
+        const panel = this.getMemoriesPanelLayout();
+        const memories = this.getSortedCollectedMemories();
+        ctx.save();
+        ctx.fillStyle = "rgba(20, 20, 24, 0.82)";
+        ctx.fillRect(panel.x, panel.y, panel.width, panel.height);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(panel.x, panel.y, panel.width, panel.height);
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "#dedede";
+        ctx.fillText("Collected memories below can be to toggle it on or off.", panel.x + 10, panel.y + panel.hintHeight / 2, panel.width - 20);
+        const headerY = panel.y + panel.hintHeight;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.fillRect(panel.x, headerY, panel.width, panel.headerHeight);
+        ctx.font = "bold 16px Arial";
+        ctx.fillStyle = "white";
+        ctx.fillText("Memories", panel.x + 10, headerY + panel.headerHeight / 2, panel.width - 100);
+        ctx.textAlign = "right";
+        ctx.fillText(`${this.collectedMemories.length}/${this.totalMemoryCount}`, panel.x + panel.width - 30, headerY + panel.headerHeight / 2);
+        ctx.textAlign = "center";
+        ctx.fillText(this.isMemoriesListOpen ? "▾" : "▸", panel.x + panel.width - 14, headerY + panel.headerHeight / 2);
+
+        if (this.isMemoriesListOpen) memories.forEach((key, index) => {
+            const rowY = headerY + panel.headerHeight + index * panel.rowHeight;
+            const isEnabled = this.memoryVisibility.get(key) !== false;
+            ctx.strokeStyle = "white";
+            ctx.strokeRect(panel.x + 10, rowY + 7, 16, 16);
+            if (isEnabled) {
+                ctx.fillStyle = "#9bd36a";
+                ctx.fillRect(panel.x + 13, rowY + 10, 10, 10);
+            }
+            const title = key.includes(".") ? key.slice(key.indexOf(".") + 1) : key;
+            ctx.textAlign = "left";
+            ctx.font = "14px Arial";
+            ctx.fillStyle = isEnabled ? "white" : "#b8b8b8";
+            ctx.fillText(title.charAt(0).toUpperCase() + title.slice(1), panel.x + 34, rowY + panel.rowHeight / 2, panel.width - 44);
+        });
+        ctx.restore();
+    }
+
+    private handleMemoriesPanelPointer = (event: PointerEvent) => {
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const panel = this.getMemoriesPanelLayout();
+        const headerY = panel.y + panel.hintHeight;
+        if (x < panel.x || x > panel.x + panel.width || y < headerY || y > panel.y + panel.height) return;
+        if (y < headerY + panel.headerHeight) {
+            this.isMemoriesListOpen = !this.isMemoriesListOpen;
+            event.preventDefault();
+            return;
+        }
+        if (!this.isMemoriesListOpen) return;
+
+        const index = Math.floor((y - headerY - panel.headerHeight) / panel.rowHeight);
+        const key = this.getSortedCollectedMemories()[index];
+        if (!key) return;
+        this.memoryVisibility.set(key, this.memoryVisibility.get(key) === false);
+        event.preventDefault();
     }
 
     private drawViewPoints = () => {

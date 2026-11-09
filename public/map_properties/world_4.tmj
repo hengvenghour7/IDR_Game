@@ -1038,6 +1038,44 @@
         }, 
         {
          "draworder":"topdown",
+         "id":17,
+         "name":"memories",
+         "objects":[
+                {
+                 "height":16,
+                 "id":7,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"key",
+                         "type":"string",
+                         "value":"4.darkness_and_blood"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1209,
+                 "y":881.5
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":16,
          "name":"info_location",
          "objects":[
@@ -1077,15 +1115,52 @@
                  "width":16,
                  "x":1225.5,
                  "y":917
+                }, 
+                {
+                 "height":16,
+                 "id":6,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"col_end",
+                         "type":"int",
+                         "value":3
+                        }, 
+                        {
+                         "name":"col_start",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"info",
+                         "type":"string",
+                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                        }, 
+                        {
+                         "name":"row",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"targetMap",
+                         "type":"string",
+                         "value":"port_world"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1225.5,
+                 "y":917
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
- "nextlayerid":17,
- "nextobjectid":6,
+ "nextlayerid":18,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
