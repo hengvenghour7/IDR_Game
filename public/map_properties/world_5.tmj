@@ -411,7 +411,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"Mirza Alakbar Sabir Garden occupies the former site of the Kaspiy newspaper building, which was destroyed during the March Events of 1918. The site preserves a connection to Baku\u2019s history of conflict and the destruction of its cultural and public institutions."
                         }, 
                         {
                          "name":"row",
@@ -448,7 +448,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"The site is also located near the Ismailiyya Building, which suffered damage during the March Events of 1918.\n\nThe aftermath of the conflict deepened ethnic divisions and hostility, disrupting cooperation between different communities. These tensions affected the oil industry\u2019s workforce, as workers became increasingly unwilling to work alongside groups they opposed, contributing to disruptions in oil production and industrial development."
                         }, 
                         {
                          "name":"row",
@@ -469,7 +469,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -502,8 +502,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":553.666666666667,
-                 "y":837.666666666667
+                 "x":553.667,
+                 "y":837.667
                 }, 
                 {
                  "height":16,
@@ -529,7 +529,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":513.666666666667,
+                 "x":513.667,
                  "y":677
                 }],
          "opacity":1,

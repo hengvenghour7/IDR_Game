@@ -620,8 +620,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":509.333333333333,
-                 "y":733.333333333333
+                 "x":509.333,
+                 "y":733.333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -803,7 +803,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"Located in Bibi-Heybat, an area closely associated with the origins of Azerbaijan\u2019s industrial oil industry, the site represents a significant point in Baku\u2019s industrial history.\n\nPlacing a birth pavillion at the location using the  context of emptiness of the site, creating an impression of the beginning of oil industry which then give birth to alot of infrastructure of baku."
                         }, 
                         {
                          "name":"row",
@@ -824,7 +824,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
