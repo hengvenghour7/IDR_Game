@@ -369,8 +369,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":794.666666666667,
-                 "y":722.333333333333
+                 "x":794.667,
+                 "y":722.333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -401,7 +401,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"Reflection pavillion is the final destination of the project and it positioned to give visitor or users views to their sorrounding. The Design is connected the view from the building to the Martyr\u2019s lane."
                         }, 
                         {
                          "name":"row",
@@ -438,7 +438,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"This is Martyr\u2019s lane memories of everyone who are killed by war and conflict. This site is connected to the project by the design of Reflection pavillion which is the final destination of the entire journey of the project.\n\nThere is no new design at the site itself since the site is already rich in context and more design will only cramp up the space."
                         }, 
                         {
                          "name":"row",

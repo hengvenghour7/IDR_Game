@@ -946,7 +946,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -1021,7 +1021,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -1032,7 +1032,7 @@
          "objects":[],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -1134,7 +1134,7 @@
                         {
                          "name":"info",
                          "type":"string",
-                         "value":"Contents for Greed location, Contents for Greed location, Contents for Greed location"
+                         "value":"Site is located in Baku bay with a clear view toward the sea which help us in creating a scene of the start of conflict which killed tons of Azerbaijanian and their infrastructure."
                         }, 
                         {
                          "name":"row",
