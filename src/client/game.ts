@@ -36,23 +36,34 @@ class Game {
     private isMusicMuted = false;
     private musicNeedsTap = false;
     private gameStarted = false;
+    private isPaused = false;
     private isTipOpen = false;
     
     constructor() {
         this.isMobileScreen = false;
 
         window.addEventListener("keypress", (e) => {
-            inputKeys.add(e.key);
-            inputKeys.delete(e.key+"u");
+            const key = this.normalizeInputKey(e.key);
+            inputKeys.add(key);
+            inputKeys.delete(key + "u");
         })
         window.addEventListener("keyup", (e) => {
-            inputKeys.delete(e.key);
-            inputKeys.add(e.key+"u");
+            const key = this.normalizeInputKey(e.key);
+            inputKeys.delete(key);
+            inputKeys.add(key + "u");
         })
         window.addEventListener("keydown", (event) => {
+            const key = this.normalizeInputKey(event.key);
+            inputKeys.add(key);
+            inputKeys.delete(key + "u");
             if (event.key === "Enter" && !this.gameStarted) {
                 event.preventDefault();
                 this.startGame();
+            } else if (event.key === "Escape" && this.gameStarted && !event.repeat) {
+                event.preventDefault();
+                this.setPaused(!this.isPaused);
+            } else if (this.gameStarted && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                event.preventDefault();
             }
         });
         window.addEventListener("resize", () => {
@@ -85,6 +96,7 @@ class Game {
         canvas.addEventListener("pointerdown", this.handleScaleButtonPointer);
         canvas.addEventListener("pointerdown", this.handleMemoriesPanelPointer);
         canvas.addEventListener("pointerdown", this.handleTipButtonPointer);
+        canvas.addEventListener("pointerdown", this.handlePausePointer);
         this.world = new World(assetUrl("images/reflection_world.png"), "", assetUrl("map_properties/reflection_world.tmj"));
         this.player = new Player(assetUrl("images/character.png"));
         this.dog = new Animal(assetUrl("images/animal.png"));
@@ -100,28 +112,43 @@ class Game {
             this.drawStartScreen();
             return;
         }
-        if (!this.interactionHandler.isGlobeMenuOpen) this.player.tick(deltaTime, this.world.collisionData);
-        this.markerAnimationTime += Math.max(0, deltaTime);
-        this.checkMapSwitchers();
-        this.dog.approachTarget(this.player, deltaTime);
+        if (!this.isPaused) {
+            if (!this.interactionHandler.isGlobeMenuOpen) this.player.tick(deltaTime, this.world.collisionData);
+            this.markerAnimationTime += Math.max(0, deltaTime);
+            this.checkMapSwitchers();
+            this.dog.approachTarget(this.player, deltaTime);
+        }
         
         this.world.draw(ctx, this.player.getWorldPos());
         this.drawCollectedMemoryStack();
-        this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), deltaTime);
+        this.world.drawAnimatedSprites(ctx, this.player.getWorldPos(), this.isPaused ? 0 : deltaTime);
         this.drawViewPoints();
         this.drawMapSwitchers();
         this.drawInfoLocations();
         this.drawGlobes();
         this.drawMemories();
-        this.player.draw(ctx, deltaTime);
-        this.dog.draw(ctx, deltaTime, this.player.getWorldPos(), this.player.worldPos);
+        this.player.draw(ctx, this.isPaused ? 0 : deltaTime);
+        this.dog.draw(ctx, this.isPaused ? 0 : deltaTime, this.player.getWorldPos(), this.player.worldPos);
         this.world.drawFront(ctx, this.player.getWorldPos());
+        if (this.isPaused) {
+            this.drawPauseScreen();
+            return;
+        }
         this.interactionHandler.tick(ctx);
         this.drawMemoriesPanel();
         this.drawSoundButton(ctx);
         if (this.isTouchDevice) {
             this.mobileUI.draw(ctx);
         }
+    }
+    private normalizeInputKey = (key: string) => {
+        const movementKeys: Record<string, string> = {
+            ArrowUp: "w",
+            ArrowDown: "s",
+            ArrowLeft: "a",
+            ArrowRight: "d"
+        };
+        return movementKeys[key] ?? key;
     }
     private handleStartPointer = (event: PointerEvent) => {
         if (this.gameStarted) return;
@@ -134,7 +161,7 @@ class Game {
         }
     }
     private handleSoundButtonPointer = (event: PointerEvent) => {
-        if (!this.gameStarted) return;
+        if (!this.gameStarted || this.isPaused) return;
         const bounds = canvas.getBoundingClientRect();
         const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
@@ -164,7 +191,7 @@ class Game {
     });
     private getTipButtonBounds = () => ({ x: canvas.width - 72, y: 116, width: 56, height: 38 });
     private handleTipButtonPointer = (event: PointerEvent) => {
-        if (!this.gameStarted) return;
+        if (!this.gameStarted || this.isPaused) return;
         const bounds = canvas.getBoundingClientRect();
         const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
@@ -174,7 +201,7 @@ class Game {
         event.preventDefault();
     }
     private handleScaleButtonPointer = (event: PointerEvent) => {
-        if (!this.gameStarted) return;
+        if (!this.gameStarted || this.isPaused) return;
         const bounds = canvas.getBoundingClientRect();
         const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
@@ -261,9 +288,110 @@ class Game {
         }
     }
     private startGame = () => {
-        if (this.gameStarted) return;
+        if (this.gameStarted || this.isPaused) return;
         this.gameStarted = true;
         this.playBackgroundMusic();
+    }
+    private setPaused = (isPaused: boolean) => {
+        if (!this.gameStarted) return;
+        this.isPaused = isPaused;
+        inputKeys.clear();
+        if (isPaused) {
+            this.mobileUI.resize();
+            this.backgroundMusic.pause();
+        } else if (!this.isMusicMuted) {
+            this.playBackgroundMusic();
+        }
+    }
+    private getPauseButtonBounds = () => {
+        const width = Math.min(170, Math.max(110, (canvas.width - 48) / 2));
+        return {
+            resume: { x: canvas.width / 2 - width - 8, y: canvas.height / 2 + 20, width, height: 54 },
+            restart: { x: canvas.width / 2 + 8, y: canvas.height / 2 + 20, width, height: 54 }
+        };
+    }
+    private handlePausePointer = (event: PointerEvent) => {
+        if (!this.isPaused) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const bounds = canvas.getBoundingClientRect();
+        const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+        const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+        const buttons = this.getPauseButtonBounds();
+        const contains = (button: typeof buttons.resume) =>
+            x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height;
+        if (contains(buttons.resume)) {
+            this.setPaused(false);
+        } else if (contains(buttons.restart)) {
+            void this.restartToStartScreen();
+        }
+    }
+    private drawPauseScreen = () => {
+        ctx.save();
+        ctx.fillStyle = "rgba(0, 0, 0, 0.68)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#fff4df";
+        ctx.font = "bold 38px Arial";
+        ctx.fillText("Paused", canvas.width / 2, canvas.height / 2 - 54);
+        ctx.font = "16px Arial";
+        ctx.fillText("Press Esc to resume", canvas.width / 2, canvas.height / 2 - 18);
+        const buttons = this.getPauseButtonBounds();
+        const drawButton = (button: typeof buttons.resume, label: string) => {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+            ctx.beginPath();
+            ctx.roundRect(button.x, button.y, button.width, button.height, 10);
+            ctx.fill();
+            ctx.strokeStyle = "#ffbd75";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 18px Arial";
+            ctx.fillText(label, button.x + button.width / 2, button.y + button.height / 2);
+        };
+        drawButton(buttons.resume, "Resume");
+        drawButton(buttons.restart, "Restart");
+        ctx.restore();
+    }
+    private restartToStartScreen = async () => {
+        this.backgroundMusic.pause();
+        const startWorld = new World(
+            assetUrl("images/reflection_world.png"),
+            "",
+            assetUrl("map_properties/reflection_world.tmj")
+        );
+        try {
+            await startWorld.prepare();
+        } catch (error) {
+            console.error("Unable to restart the game:", error);
+            return;
+        }
+
+        this.world = startWorld;
+        this.currentMap = "reflection_world";
+        this.interactionHandler.world = startWorld;
+        this.interactionHandler.reset();
+        const start = startWorld.startingPoints[0];
+        const destination = start
+            ? { x: (start.x + start.width / 2) * 2, y: (start.y + start.height / 2) * 2 }
+            : { x: 800, y: 640 };
+        this.player.worldPos = {
+            x: destination.x - canvas.width / (2 * GLOBAL_SCALE),
+            y: destination.y - canvas.height / (2 * GLOBAL_SCALE)
+        };
+        this.dog.worldPos = { x: destination.x + 48, y: destination.y };
+        this.collectedMemories.length = 0;
+        this.memoryVisibility.clear();
+        this.arrivalSwitcherId = null;
+        this.isChangingWorld = false;
+        this.isPaused = false;
+        this.gameStarted = false;
+        this.isTipOpen = false;
+        this.isMusicMuted = false;
+        this.musicNeedsTap = false;
+        this.backgroundMusic.muted = false;
+        inputKeys.clear();
     }
     private playBackgroundMusic = () => {
         void this.backgroundMusic.play().catch((error: unknown) => {
@@ -297,8 +425,9 @@ class Game {
         // ctx.shadowBlur = 0;
         const button = this.getStartButtonBounds();
         ctx.fillStyle = "#fff4df";
-        ctx.font = "18px Arial";
-        ctx.fillText("WASD to move  • Hold I to interact", canvas.width / 2, button.y - 24);
+        ctx.font = "16px Arial";
+        ctx.fillText("Move: WASD or arrows  •  Hold I to interact", canvas.width / 2, button.y - 46);
+        ctx.fillText("Press Esc to pause", canvas.width / 2, button.y - 24);
         ctx.font = "16px Arial";
         ctx.fillText("Collect memories across the map to update", canvas.width / 2, canvas.height * 0.53);
         ctx.fillText("reflection pavillion design.", canvas.width / 2, canvas.height * 0.53 + 24);
@@ -311,7 +440,8 @@ class Game {
         ctx.stroke();
         ctx.fillStyle = "white";
         ctx.font = "bold 24px Arial";
-        ctx.fillText("START GAME", canvas.width / 2, button.y + 39);
+        ctx.textBaseline = "middle";
+        ctx.fillText("START GAME", button.x + button.width / 2, button.y + button.height / 2);
         ctx.restore();
     }
     changeworld = async (destinationMap: MapName, travelToGlobe = false) => {
@@ -455,8 +585,10 @@ class Game {
                 height: memory.height * 2
             };
             if (checkRectangleCollision(memoryBox, this.player.getCollisionBox())) {
-                this.collectedMemories.push(key);
-                this.memoryVisibility.set(key, true);
+                if (!this.isPaused) {
+                    this.collectedMemories.push(key);
+                    this.memoryVisibility.set(key, true);
+                }
                 return;
             }
             const property = (name: string) => memory.properties?.find((item) => item.name === name)?.value;
@@ -563,6 +695,7 @@ class Game {
     }
 
     private handleMemoriesPanelPointer = (event: PointerEvent) => {
+        if (!this.gameStarted || this.isPaused) return;
         const bounds = canvas.getBoundingClientRect();
         const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
         const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
