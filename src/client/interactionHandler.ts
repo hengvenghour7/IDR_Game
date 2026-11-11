@@ -135,6 +135,16 @@ class InteractionHandler {
         }
     }
 
+    reset = () => {
+        this.isViewOpen = false;
+        this.isViewAvailable = false;
+        this.isGlobeMenuOpen = false;
+        this.selectedDestination = 0;
+        this.isInfoOpen = false;
+        this.openedInfoText = null;
+        this.wasIPressed = false;
+    }
+
     private handleMenuKey = (event: KeyboardEvent) => {
         if (!this.isGlobeMenuOpen) return;
         if (event.key === "Escape") {
